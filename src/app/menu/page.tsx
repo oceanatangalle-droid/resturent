@@ -12,7 +12,7 @@ const container = {
     y: 0,
     transition: {
       duration: 0.7,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
     },
   },
 };
@@ -25,7 +25,7 @@ const item = {
     transition: {
       duration: 0.5,
       delay: i * 0.04,
-      ease: [0.25, 0.6, 0.3, 0.98],
+      ease: [0.25, 0.6, 0.3, 0.98] as [number, number, number, number],
     },
   }),
 };

@@ -5,7 +5,7 @@ import { verifyAuth } from '@/lib/middleware';
 // GET: get single reservation (admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await verifyAuth(request);
@@ -13,9 +13,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const result = await pool.query(
       'SELECT * FROM reservations WHERE id = $1',
-      [params.id]
+      [id]
     );
 
     if (result.rows.length === 0) {
@@ -35,7 +36,7 @@ export async function GET(
 // PUT: update reservation (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await verifyAuth(request);
@@ -43,11 +44,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const { name, email, phone, reservation_date, reservation_time, guests, notes, status } = await request.json();
 
     const result = await pool.query(
       'UPDATE reservations SET name = $1, email = $2, phone = $3, reservation_date = $4, reservation_time = $5, guests = $6, notes = $7, status = $8 WHERE id = $9 RETURNING *',
-      [name, email, phone || null, reservation_date, reservation_time, parseInt(guests), notes || null, status || 'pending', params.id]
+      [name, email, phone || null, reservation_date, reservation_time, parseInt(guests), notes || null, status || 'pending', id]
     );
 
     if (result.rows.length === 0) {
@@ -67,7 +69,7 @@ export async function PUT(
 // DELETE: delete reservation (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await verifyAuth(request);
@@ -75,9 +77,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const result = await pool.query(
       'DELETE FROM reservations WHERE id = $1 RETURNING *',
-      [params.id]
+      [id]
     );
 
     if (result.rows.length === 0) {

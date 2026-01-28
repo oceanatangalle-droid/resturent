@@ -4,12 +4,13 @@ import { verifyAuth } from '@/lib/middleware';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const result = await pool.query(
       'SELECT * FROM menu_sections WHERE id = $1',
-      [params.id]
+      [id]
     );
 
     if (result.rows.length === 0) {
@@ -28,7 +29,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await verifyAuth(request);
@@ -36,11 +37,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const { title, subtitle, display_order } = await request.json();
 
     const result = await pool.query(
       'UPDATE menu_sections SET title = $1, subtitle = $2, display_order = $3 WHERE id = $4 RETURNING *',
-      [title, subtitle || null, display_order || 0, params.id]
+      [title, subtitle || null, display_order || 0, id]
     );
 
     if (result.rows.length === 0) {
@@ -59,7 +61,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await verifyAuth(request);
@@ -67,9 +69,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const result = await pool.query(
       'DELETE FROM menu_sections WHERE id = $1 RETURNING *',
-      [params.id]
+      [id]
     );
 
     if (result.rows.length === 0) {

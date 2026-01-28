@@ -11,7 +11,7 @@ const container = {
     y: 0,
     transition: {
       duration: 0.75,
-      ease: [0.19, 0.6, 0.26, 0.98],
+      ease: [0.19, 0.6, 0.26, 0.98] as [number, number, number, number],
     },
   },
 };
@@ -24,7 +24,7 @@ const imageCard = {
     scale: 1,
     transition: {
       duration: 0.9,
-      ease: [0.16, 0.7, 0.24, 1],
+      ease: [0.16, 0.7, 0.24, 1] as [number, number, number, number],
       delay: 0.12,
     },
   },
