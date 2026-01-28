@@ -1,7 +1,9 @@
  "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const container = {
   hidden: { opacity: 0, y: 24 },
@@ -16,6 +18,64 @@ const container = {
 };
 
 export default function BookATablePage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    date: "",
+    time: "",
+    guests: "2",
+    notes: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          reservation_date: formData.date,
+          reservation_time: formData.time,
+          guests: parseInt(formData.guests),
+          notes: formData.notes || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to submit reservation");
+        return;
+      }
+
+      setSuccess(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        date: "",
+        time: "",
+        guests: "2",
+        notes: "",
+      });
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-veloria-black pb-16 pt-10">
       <header className="border-b border-white/5 bg-veloria-black/80">
@@ -58,7 +118,18 @@ export default function BookATablePage() {
                 details can be sent directly to your system of choice.
               </p>
 
-              <form className="space-y-4 rounded-2xl border border-veloria-border bg-veloria-elevated/80 p-5 text-sm md:p-6">
+              <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-veloria-border bg-veloria-elevated/80 p-5 text-sm md:p-6">
+                {error && (
+                  <div className="rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-red-400">
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div className="rounded-lg bg-emerald-500/15 border border-emerald-500/50 p-3 text-sm text-emerald-300">
+                    Reservation submitted successfully! We'll contact you soon to confirm.
+                  </div>
+                )}
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <label htmlFor="name" className="text-xs text-veloria-muted">
@@ -67,7 +138,10 @@ export default function BookATablePage() {
                     <input
                       id="name"
                       type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Alex Rivera"
+                      required
                       className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                     />
                   </div>
@@ -78,10 +152,27 @@ export default function BookATablePage() {
                     <input
                       id="email"
                       type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="you@example.com"
+                      required
                       className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="phone" className="text-xs text-veloria-muted">
+                    Phone (optional)
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+1 (123) 456-7890"
+                    className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
+                  />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -92,6 +183,9 @@ export default function BookATablePage() {
                     <input
                       id="date"
                       type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      required
                       className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                     />
                   </div>
@@ -102,6 +196,9 @@ export default function BookATablePage() {
                     <input
                       id="time"
                       type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      required
                       className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                     />
                   </div>
@@ -111,6 +208,9 @@ export default function BookATablePage() {
                     </label>
                     <select
                       id="guests"
+                      value={formData.guests}
+                      onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
+                      required
                       className="h-10 w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                     >
                       {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -118,7 +218,7 @@ export default function BookATablePage() {
                           {n} {n === 1 ? "guest" : "guests"}
                         </option>
                       ))}
-                      <option value="7+">7+ guests</option>
+                      <option value="7">7+ guests</option>
                     </select>
                   </div>
                 </div>
@@ -130,22 +230,20 @@ export default function BookATablePage() {
                   <textarea
                     id="notes"
                     rows={3}
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="Allergies, celebrations, or special requests…"
                     className="w-full rounded-lg border border-veloria-border bg-veloria-black/70 px-3 py-2 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                   />
                 </div>
 
                 <button
-                  type="button"
-                  className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-veloria-gold px-6 text-xs font-semibold uppercase tracking-[0.18em] text-veloria-black shadow-[0_18px_40px_rgba(0,0,0,0.75)] transition hover:bg-veloria-gold-soft"
+                  type="submit"
+                  disabled={loading}
+                  className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-veloria-gold px-6 text-xs font-semibold uppercase tracking-[0.18em] text-veloria-black shadow-[0_18px_40px_rgba(0,0,0,0.75)] transition hover:bg-veloria-gold-soft disabled:opacity-50"
                 >
-                  Submit Request (demo)
+                  {loading ? "Submitting..." : "Submit Request"}
                 </button>
-
-                <p className="pt-1 text-[0.7rem] text-veloria-muted">
-                  This is a front-end only booking form in this clone. Connect
-                  it to your own API, booking provider, or email workflow.
-                </p>
               </form>
             </div>
 

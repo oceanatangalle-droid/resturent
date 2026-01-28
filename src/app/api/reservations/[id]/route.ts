@@ -2,30 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { verifyAuth } from '@/lib/middleware';
 
+// GET: get single reservation (admin only)
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const auth = await verifyAuth(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const result = await pool.query(
-      'SELECT * FROM menu_items WHERE id = $1',
+      'SELECT * FROM reservations WHERE id = $1',
       [params.id]
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching item:', error);
+    console.error('Error fetching reservation:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch item' },
+      { error: 'Failed to fetch reservation' },
       { status: 500 }
     );
   }
 }
 
+// PUT: update reservation (admin only)
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -36,46 +43,28 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const {
-      section_id,
-      name,
-      description,
-      price,
-      image_src,
-      image_data,
-      image_mime_type,
-      display_order,
-    } = await request.json();
+    const { name, email, phone, reservation_date, reservation_time, guests, notes, status } = await request.json();
 
     const result = await pool.query(
-      'UPDATE menu_items SET section_id = $1, name = $2, description = $3, price = $4, image_src = $5, image_data = $6, image_mime_type = $7, display_order = $8 WHERE id = $9 RETURNING *',
-      [
-        section_id,
-        name,
-        description || null,
-        price,
-        image_src || null,
-        image_data || null,
-        image_mime_type || null,
-        display_order || 0,
-        params.id,
-      ]
+      'UPDATE reservations SET name = $1, email = $2, phone = $3, reservation_date = $4, reservation_time = $5, guests = $6, notes = $7, status = $8 WHERE id = $9 RETURNING *',
+      [name, email, phone || null, reservation_date, reservation_time, parseInt(guests), notes || null, status || 'pending', params.id]
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating item:', error);
+    console.error('Error updating reservation:', error);
     return NextResponse.json(
-      { error: 'Failed to update item' },
+      { error: 'Failed to update reservation' },
       { status: 500 }
     );
   }
 }
 
+// DELETE: delete reservation (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -87,19 +76,19 @@ export async function DELETE(
     }
 
     const result = await pool.query(
-      'DELETE FROM menu_items WHERE id = $1 RETURNING *',
+      'DELETE FROM reservations WHERE id = $1 RETURNING *',
       [params.id]
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Reservation not found' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting item:', error);
+    console.error('Error deleting reservation:', error);
     return NextResponse.json(
-      { error: 'Failed to delete item' },
+      { error: 'Failed to delete reservation' },
       { status: 500 }
     );
   }

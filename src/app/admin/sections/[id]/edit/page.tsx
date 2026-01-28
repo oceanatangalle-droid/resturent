@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { AdminSidebar } from "@/components/admin-sidebar";
 
 export default function EditSectionPage() {
   const router = useRouter();
@@ -62,17 +62,11 @@ export default function EditSectionPage() {
   };
 
   return (
-    <main className="min-h-screen bg-veloria-black pb-16 pt-10">
-      <header className="border-b border-white/5 bg-veloria-black/80">
-        <div className="veloria-container flex items-center justify-between py-4">
-          <Link href="/admin/dashboard" className="text-xs font-semibold uppercase tracking-[0.22em] text-veloria-muted hover:text-veloria-cream">
-            ← Back to Dashboard
-          </Link>
-        </div>
-      </header>
-
-      <section className="mt-10">
-        <div className="veloria-container max-w-2xl">
+    <div className="flex min-h-screen bg-veloria-black">
+      <AdminSidebar />
+      <main className="flex-1 ml-64 pb-16 pt-10">
+        <section className="mt-10">
+          <div className="veloria-container px-8 max-w-2xl">
           <h1 className="text-2xl font-semibold text-veloria-cream mb-6">
             Edit Section
           </h1>
@@ -135,7 +129,8 @@ export default function EditSectionPage() {
             </div>
           </form>
         </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }

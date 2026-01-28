@@ -35,7 +35,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { section_id, name, description, price, image_src, display_order } = await request.json();
+    const {
+      section_id,
+      name,
+      description,
+      price,
+      image_src,
+      image_data,
+      image_mime_type,
+      display_order,
+    } = await request.json();
 
     if (!section_id || !name || !price) {
       return NextResponse.json(
@@ -45,8 +54,17 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await pool.query(
-      'INSERT INTO menu_items (section_id, name, description, price, image_src, display_order) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [section_id, name, description || null, price, image_src || null, display_order || 0]
+      'INSERT INTO menu_items (section_id, name, description, price, image_src, image_data, image_mime_type, display_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [
+        section_id,
+        name,
+        description || null,
+        price,
+        image_src || null,
+        image_data || null,
+        image_mime_type || null,
+        display_order || 0,
+      ]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

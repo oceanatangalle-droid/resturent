@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { AdminSidebar } from "@/components/admin-sidebar";
 
 interface MenuSection {
   id: number;
@@ -20,6 +21,8 @@ interface MenuItem {
   description: string | null;
   price: string;
   image_src: string | null;
+  image_data: string | null;
+  image_mime_type: string | null;
   display_order: number;
 }
 
@@ -78,51 +81,24 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleLogout = () => {
-    document.cookie = "admin-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push("/admin/login");
-  };
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-veloria-black p-8">
-        <div className="veloria-container">
+      <div className="flex min-h-screen bg-veloria-black">
+        <AdminSidebar />
+        <main className="flex-1 ml-64 p-8">
           <div className="text-center text-veloria-cream">Loading...</div>
-        </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-veloria-black pb-16 pt-10">
-      <header className="border-b border-white/5 bg-veloria-black/80 sticky top-0 z-20">
-        <div className="veloria-container flex items-center justify-between py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-xs font-semibold uppercase tracking-[0.22em] text-veloria-muted hover:text-veloria-cream">
-              Veloria
-            </Link>
-            <span className="text-xs text-veloria-muted">/</span>
-            <span className="text-xs text-veloria-cream">Admin Dashboard</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/admin/menu/new"
-              className="rounded-full bg-veloria-gold px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-veloria-black hover:bg-veloria-gold-soft"
-            >
-              + Add Item
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="text-xs text-veloria-muted hover:text-veloria-cream"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <section className="mt-10">
-        <div className="veloria-container">
+    <div className="flex min-h-screen bg-veloria-black">
+      <AdminSidebar />
+      <main className="flex-1 ml-64 pb-16 pt-10">
+        <section className="mt-10">
+          <div className="veloria-container px-8">
           <div className="mb-6">
             <h1 className="text-2xl font-semibold text-veloria-cream mb-2">
               Menu Management
@@ -182,10 +158,13 @@ export default function AdminDashboard() {
                         key={item.id}
                         className="flex items-center gap-4 rounded-lg border border-veloria-border bg-veloria-black/60 p-4"
                       >
-                        {item.image_src && (
+                        {(item.image_src || item.image_data) && (
                           <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-veloria-border">
                             <Image
-                              src={item.image_src}
+                              src={
+                                item.image_src ||
+                                `data:${item.image_mime_type || "image/jpeg"};base64,${item.image_data}`
+                              }
                               alt={item.name}
                               width={48}
                               height={48}
@@ -238,8 +217,9 @@ export default function AdminDashboard() {
               </Link>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

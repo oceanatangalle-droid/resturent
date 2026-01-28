@@ -37,6 +37,8 @@ type MenuItem = {
   description: string | null;
   price: string;
   image_src: string | null;
+  image_data: string | null;
+  image_mime_type: string | null;
   display_order: number;
 };
 
@@ -159,10 +161,13 @@ export default function MenuPage() {
                       viewport={{ once: true, amount: 0.3 }}
                       variants={item}
                     >
-                      {menuItem.image_src && (
+                      {(menuItem.image_src || menuItem.image_data) && (
                         <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border border-veloria-border bg-veloria-black/60">
                           <Image
-                            src={menuItem.image_src}
+                            src={
+                              menuItem.image_src ||
+                              `data:${menuItem.image_mime_type || "image/jpeg"};base64,${menuItem.image_data}`
+                            }
                             alt={menuItem.name}
                             width={56}
                             height={56}

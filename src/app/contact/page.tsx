@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const container = {
   hidden: { opacity: 0, y: 24 },
@@ -13,7 +14,31 @@ const container = {
   },
 };
 
+type ContactDetails = {
+  restaurant_name?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  hours?: string;
+  map_embed_url?: string;
+  notes?: string;
+};
+
 export default function ContactPage() {
+  const [contact, setContact] = useState<ContactDetails | null>(null);
+
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const res = await fetch("/api/contact");
+        const data = await res.json();
+        setContact(data);
+      } catch (e) {
+        // ignore, fallback UI will render
+      }
+    };
+    fetchContact();
+  }, []);
   return (
     <main className="min-h-screen bg-veloria-black pb-16 pt-10">
       <header className="border-b border-white/5 bg-veloria-black/80">
@@ -132,25 +157,30 @@ export default function ContactPage() {
                   Visit Us
                 </p>
                 <p className="mt-3 text-veloria-cream">
-                  70 Washington Square South,
-                  <br />
-                  New York, NY 10012, United States
+                  {(contact?.address || "70 Washington Square South,\nNew York, NY 10012, United States")
+                    .split("\n")
+                    .map((line) => (
+                      <>
+                        {line}
+                        <br />
+                      </>
+                    ))}
                 </p>
                 <p className="mt-3">
                   Phone:{" "}
                   <a
-                    href="tel:+11234567890"
+                    href={`tel:${contact?.phone || "+11234567890"}`}
                     className="text-veloria-gold-soft underline-offset-4 hover:underline"
                   >
-                    +1 (123) 456-7890
+                    {contact?.phone || "+1 (123) 456-7890"}
                   </a>
                   <br />
                   Email:{" "}
                   <a
-                    href="mailto:hello@veloria.nyc"
+                    href={`mailto:${contact?.email || "hello@veloria.nyc"}`}
                     className="text-veloria-gold-soft underline-offset-4 hover:underline"
                   >
-                    hello@veloria.nyc
+                    {contact?.email || "hello@veloria.nyc"}
                   </a>
                 </p>
               </div>
@@ -160,15 +190,19 @@ export default function ContactPage() {
                   Hours
                 </p>
                 <p className="mt-3">
-                  Breakfast 7 – 11 AM
-                  <br />
-                  Lunch 12 – 3 PM
-                  <br />
-                  Dinner 6 – 11 PM
+                  {(contact?.hours ||
+                    "Breakfast 7 – 11 AM\nLunch 12 – 3 PM\nDinner 6 – 11 PM")
+                    .split("\n")
+                    .map((line) => (
+                      <>
+                        {line}
+                        <br />
+                      </>
+                    ))}
                 </p>
                 <p className="mt-3 text-veloria-muted">
-                  For last-minute availability, please call the restaurant
-                  directly.
+                  {contact?.notes ||
+                    "For last-minute availability, please call the restaurant directly."}
                 </p>
               </div>
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AdminSidebar } from "@/components/admin-sidebar";
 
 interface Section {
   id: number;
@@ -19,8 +20,11 @@ export default function NewMenuItemPage() {
     description: "",
     price: "",
     image_src: "",
+    image_data: "",
+    image_mime_type: "",
     display_order: 0,
   });
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSections();
@@ -69,17 +73,11 @@ export default function NewMenuItemPage() {
   };
 
   return (
-    <main className="min-h-screen bg-veloria-black pb-16 pt-10">
-      <header className="border-b border-white/5 bg-veloria-black/80">
-        <div className="veloria-container flex items-center justify-between py-4">
-          <Link href="/admin/dashboard" className="text-xs font-semibold uppercase tracking-[0.22em] text-veloria-muted hover:text-veloria-cream">
-            ← Back to Dashboard
-          </Link>
-        </div>
-      </header>
-
-      <section className="mt-10">
-        <div className="veloria-container max-w-2xl">
+    <div className="flex min-h-screen bg-veloria-black">
+      <AdminSidebar />
+      <main className="flex-1 ml-64 pb-16 pt-10">
+        <section className="mt-10">
+          <div className="veloria-container px-8 max-w-2xl">
           <h1 className="text-2xl font-semibold text-veloria-cream mb-6">
             Add New Menu Item
           </h1>
@@ -172,6 +170,50 @@ export default function NewMenuItemPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs text-veloria-muted">
+                Upload Image (saved as Base64)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const result = reader.result as string;
+                    const base64 = result.split(",")[1] || "";
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_data: base64,
+                      image_mime_type: file.type,
+                    }));
+                    setPreview(result);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="block w-full text-xs text-veloria-muted file:mr-3 file:rounded-full file:border-0 file:bg-veloria-gold file:px-3 file:py-1.5 file:text-xs file:font-semibold file:uppercase file:tracking-[0.18em] file:text-veloria-black hover:file:bg-veloria-gold-soft"
+              />
+              {preview && (
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="h-12 w-12 overflow-hidden rounded-lg border border-veloria-border">
+                    {/* decoded preview */}
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <p className="text-[0.7rem] text-veloria-muted">
+                    This image will be stored in the database as Base64 and
+                    decoded on display.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-4">
               <button
                 type="submit"
@@ -189,7 +231,8 @@ export default function NewMenuItemPage() {
             </div>
           </form>
         </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }
