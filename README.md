@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Veloria Restaurant - Admin Panel Setup
 
-## Getting Started
+This is a Next.js restaurant website with a PostgreSQL database and admin panel for menu management.
 
-First, run the development server:
+## Features
+
+- 🍽️ Dynamic menu system with sections and items
+- 🔐 Admin authentication system
+- 📊 Admin dashboard for managing menu items
+- 🗄️ PostgreSQL database integration
+- 🎨 Beautiful, modern UI with Framer Motion animations
+
+## Prerequisites
+
+- Node.js 18+ installed
+- PostgreSQL database (local or remote)
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up PostgreSQL Database
+
+Create a PostgreSQL database:
+
+```bash
+# Using psql
+createdb veloria_db
+
+# Or using SQL
+psql -U postgres
+CREATE DATABASE veloria_db;
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your database connection string:
+
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/veloria_db
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+ADMIN_PASSWORD=admin123
+```
+
+### 4. Initialize Database
+
+Run the database initialization script to create tables and seed initial data:
+
+```bash
+npm run db:init
+```
+
+This will:
+- Create all necessary database tables
+- Create a default admin user (username: `admin`, password: from `ADMIN_PASSWORD` env var or `admin123`)
+- Create default menu sections
+
+### 5. Start Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the website.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Admin Panel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Access the admin panel at: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
 
-## Learn More
+**Default Credentials:**
+- Username: `admin`
+- Password: `admin123` (or whatever you set in `ADMIN_PASSWORD`)
 
-To learn more about Next.js, take a look at the following resources:
+### Admin Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Dashboard**: View all menu sections and items
+- **Add/Edit/Delete Menu Items**: Full CRUD operations
+- **Add/Edit/Delete Menu Sections**: Manage menu categories
+- **Image Support**: Add images to menu items via URL
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Database Schema
 
-## Deploy on Vercel
+### Tables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `menu_sections`: Menu categories (Breakfast, Lunch, Dinner, etc.)
+- `menu_items`: Individual menu items
+- `admin_users`: Admin user accounts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### API Endpoints
+
+- `GET /api/menu/full` - Get all sections with items (public)
+- `GET /api/menu/sections` - Get all sections
+- `POST /api/menu/sections` - Create section (admin)
+- `PUT /api/menu/sections/[id]` - Update section (admin)
+- `DELETE /api/menu/sections/[id]` - Delete section (admin)
+- `GET /api/menu/items` - Get items (optionally filtered by section)
+- `POST /api/menu/items` - Create item (admin)
+- `PUT /api/menu/items/[id]` - Update item (admin)
+- `DELETE /api/menu/items/[id]` - Delete item (admin)
+- `POST /api/auth/login` - Admin login
+
+## Production Deployment
+
+Before deploying to production:
+
+1. **Change JWT_SECRET** to a strong, random value
+2. **Change ADMIN_PASSWORD** to a secure password
+3. **Use environment variables** for all sensitive data
+4. **Enable SSL** for database connections
+5. **Set up proper database backups**
+
+## Tech Stack
+
+- **Framework**: Next.js 16
+- **Database**: PostgreSQL
+- **Authentication**: JWT tokens
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+
+## License
+
+MIT
