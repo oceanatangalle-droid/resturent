@@ -9,6 +9,9 @@ This is a Next.js restaurant website with a PostgreSQL database and admin panel 
 - 📊 Admin dashboard for managing menu items
 - 🗄️ PostgreSQL database integration
 - 🎨 Beautiful, modern UI with Framer Motion animations
+- 📝 Editable Hero, About, and Contact sections
+- 📅 Reservation/Booking system
+- 🖼️ Image upload support (Base64 and URL)
 
 ## Prerequisites
 
@@ -84,17 +87,24 @@ Access the admin panel at: [http://localhost:3000/admin/login](http://localhost:
 ### Admin Features
 
 - **Dashboard**: View all menu sections and items
-- **Add/Edit/Delete Menu Items**: Full CRUD operations
+- **Add/Edit/Delete Menu Items**: Full CRUD operations with image upload (Base64 or URL)
 - **Add/Edit/Delete Menu Sections**: Manage menu categories
-- **Image Support**: Add images to menu items via URL
+- **Hero Section Editor**: Edit homepage hero content
+- **About Section Editor**: Edit about page content
+- **Contact Settings**: Manage contact details
+- **Reservations Management**: View and manage table bookings
 
 ## Database Schema
 
 ### Tables
 
 - `menu_sections`: Menu categories (Breakfast, Lunch, Dinner, etc.)
-- `menu_items`: Individual menu items
+- `menu_items`: Individual menu items with image support
 - `admin_users`: Admin user accounts
+- `contact_details`: Contact information
+- `hero_content`: Hero section content
+- `about_content`: About page content
+- `reservations`: Table booking reservations
 
 ### API Endpoints
 
@@ -107,6 +117,16 @@ Access the admin panel at: [http://localhost:3000/admin/login](http://localhost:
 - `POST /api/menu/items` - Create item (admin)
 - `PUT /api/menu/items/[id]` - Update item (admin)
 - `DELETE /api/menu/items/[id]` - Delete item (admin)
+- `GET /api/hero` - Get hero content (public)
+- `PUT /api/hero` - Update hero content (admin)
+- `GET /api/about` - Get about content (public)
+- `PUT /api/about` - Update about content (admin)
+- `GET /api/contact` - Get contact details (public)
+- `PUT /api/contact` - Update contact details (admin)
+- `GET /api/reservations` - List reservations (admin)
+- `POST /api/reservations` - Create reservation (public)
+- `PUT /api/reservations/[id]` - Update reservation (admin)
+- `DELETE /api/reservations/[id]` - Delete reservation (admin)
 - `POST /api/auth/login` - Admin login
 
 ## Production Deployment
