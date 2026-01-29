@@ -129,6 +129,41 @@ Access the admin panel at: [http://localhost:3000/admin/login](http://localhost:
 - `DELETE /api/reservations/[id]` - Delete reservation (admin)
 - `POST /api/auth/login` - Admin login
 
+## Deploy to Vercel with Supabase
+
+### 1. Supabase database
+
+- Create a project at [Supabase](https://app.supabase.com).
+- In **Settings → Database**, copy the **Connection string → URI** (or use the **Session pooler** Node.js string).
+- In **SQL Editor**, run the contents of `database/schema.sql` to create tables.
+- Seed data once (from your machine):
+
+```bash
+DATABASE_URL="postgresql://postgres.PROJECT_REF:YOUR_PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres" \
+ADMIN_PASSWORD="your-admin-password" \
+npm run db:init
+```
+
+Use your real Supabase password; if it contains `&` or `@`, URL-encode it (`&` → `%26`, `@` → `%40`).
+
+### 2. Vercel environment variables
+
+In Vercel: **Project → Settings → Environment Variables**. Add:
+
+| Name | Value | Notes |
+|------|--------|--------|
+| `DATABASE_URL` | Your Supabase connection string (pooler) | URL-encode password if it has `&` or `@` |
+| `JWT_SECRET` | Long random string | e.g. `openssl rand -base64 32` |
+| `ADMIN_PASSWORD` | Admin login password | Same as used in `db:init` |
+
+Redeploy after saving variables.
+
+### 3. Connection
+
+The app uses `DATABASE_URL` and enables SSL automatically for Supabase, so no code changes are needed once the env is set in Vercel.
+
+---
+
 ## Production Deployment
 
 Before deploying to production:
@@ -136,7 +171,7 @@ Before deploying to production:
 1. **Change JWT_SECRET** to a strong, random value
 2. **Change ADMIN_PASSWORD** to a secure password
 3. **Use environment variables** for all sensitive data
-4. **Enable SSL** for database connections
+4. **Enable SSL** for database connections (handled for Supabase)
 5. **Set up proper database backups**
 
 ## Tech Stack
