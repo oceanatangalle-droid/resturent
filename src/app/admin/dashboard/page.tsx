@@ -1,225 +1,72 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { AdminSidebar } from "@/components/admin-sidebar";
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { IconMenu, IconReservations, IconContact, IconHome, IconBranding, IconSpecialOffer, IconSettings } from '@/components/admin/AdminIcons'
 
-interface MenuSection {
-  id: number;
-  title: string;
-  subtitle: string | null;
-  display_order: number;
-  items: MenuItem[];
-}
-
-interface MenuItem {
-  id: number;
-  section_id: number;
-  name: string;
-  description: string | null;
-  price: string;
-  image_src: string | null;
-  image_data: string | null;
-  image_mime_type: string | null;
-  display_order: number;
-}
+const cards = [
+  { href: '/admin/menu', title: 'Menu', desc: 'Categories & items', icon: IconMenu },
+  { href: '/admin/contact', title: 'Contact', desc: 'Address, phone, hours', icon: IconContact },
+  { href: '/admin/home', title: 'Home', desc: 'Hero, about, features', icon: IconHome },
+  { href: '/admin/home', title: 'Special Offer', desc: 'Discount section & image', icon: IconSpecialOffer },
+  { href: '/admin/branding', title: 'Branding', desc: 'Favicon & logo', icon: IconBranding },
+  { href: '/admin/settings', title: 'Settings', desc: 'Currency & site options', icon: IconSettings },
+  { href: '/admin/reservations', title: 'Reservations', desc: 'Book table requests', icon: IconReservations },
+]
 
 export default function AdminDashboard() {
-  const [sections, setSections] = useState<MenuSection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [stats, setStats] = useState<{ reservations: number; menuItems: number } | null>(null)
 
   useEffect(() => {
-    fetchMenu();
-  }, []);
-
-  const fetchMenu = async () => {
-    try {
-      const response = await fetch("/api/menu/full");
-      if (!response.ok) throw new Error("Failed to fetch menu");
-      const data = await response.json();
-      setSections(data);
-    } catch (err) {
-      setError("Failed to load menu");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteItem = async (itemId: number) => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
-
-    try {
-      const response = await fetch(`/api/menu/items/${itemId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to delete item");
-      fetchMenu();
-    } catch (err) {
-      alert("Failed to delete item");
-    }
-  };
-
-  const handleDeleteSection = async (sectionId: number) => {
-    if (!confirm("Are you sure? This will delete all items in this section."))
-      return;
-
-    try {
-      const response = await fetch(`/api/menu/sections/${sectionId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to delete section");
-      fetchMenu();
-    } catch (err) {
-      alert("Failed to delete section");
-    }
-  };
-
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-veloria-black">
-        <AdminSidebar />
-        <main className="flex-1 ml-64 p-8">
-          <div className="text-center text-veloria-cream">Loading...</div>
-        </main>
-      </div>
-    );
-  }
+    Promise.all([fetch('/api/reservations'), fetch('/api/menu/items')])
+      .then(async ([resRes, itemsRes]) => {
+        const reservations = resRes.ok ? (await resRes.json()).length : 0
+        const menuItems = itemsRes.ok ? (await itemsRes.json()).length : 0
+        setStats({ reservations, menuItems })
+      })
+      .catch(() => setStats({ reservations: 0, menuItems: 0 }))
+  }, [])
 
   return (
-    <div className="flex min-h-screen bg-veloria-black">
-      <AdminSidebar />
-      <main className="flex-1 ml-64 pb-16 pt-10">
-        <section className="mt-10">
-          <div className="veloria-container px-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-veloria-cream mb-2">
-              Menu Management
-            </h1>
-            <p className="text-sm text-veloria-muted">
-              Manage your menu sections and items
-            </p>
+    <div>
+      <AdminPageHeader
+        title="Dashboard"
+        subtitle="Manage your restaurant content and reservations."
+      />
+      {stats !== null && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+            <p className="text-sm font-medium text-zinc-400">Reservations</p>
+            <p className="text-2xl font-semibold text-white mt-1">{stats.reservations}</p>
+            <p className="text-xs text-zinc-500 mt-1">Total bookings</p>
           </div>
-
-          {error && (
-            <div className="mb-6 rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-red-400">
-              {error}
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+            <p className="text-sm font-medium text-zinc-400">Menu items</p>
+            <p className="text-2xl font-semibold text-white mt-1">{stats.menuItems}</p>
+            <p className="text-xs text-zinc-500 mt-1">Across all categories</p>
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {cards.map(({ href, title, desc, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="group flex items-start gap-4 bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-200"
+          >
+            <span className="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-400 group-hover:bg-primary-600/20 group-hover:text-primary-400 flex items-center justify-center shrink-0 transition-colors">
+              <Icon />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">
+                {title}
+              </h2>
+              <p className="text-sm text-zinc-400 mt-0.5">{desc}</p>
             </div>
-          )}
-
-          <div className="space-y-8">
-            {sections.map((section) => (
-              <div
-                key={section.id}
-                className="rounded-xl border border-veloria-border bg-veloria-elevated/70 p-6"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-lg font-semibold text-veloria-cream">
-                      {section.title}
-                    </h2>
-                    {section.subtitle && (
-                      <p className="text-xs text-veloria-muted mt-1">
-                        {section.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/admin/sections/${section.id}/edit`}
-                      className="text-xs text-veloria-gold-soft hover:text-veloria-gold"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteSection(section.id)}
-                      className="text-xs text-red-400 hover:text-red-300"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {section.items.length === 0 ? (
-                    <p className="text-sm text-veloria-muted italic">
-                      No items in this section
-                    </p>
-                  ) : (
-                    section.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-4 rounded-lg border border-veloria-border bg-veloria-black/60 p-4"
-                      >
-                        {(item.image_src || item.image_data) && (
-                          <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-veloria-border">
-                            <Image
-                              src={
-                                item.image_src ||
-                                `data:${item.image_mime_type || "image/jpeg"};base64,${item.image_data}`
-                              }
-                              alt={item.name}
-                              width={48}
-                              height={48}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-veloria-cream">
-                            {item.name}
-                          </h3>
-                          {item.description && (
-                            <p className="text-xs text-veloria-muted mt-1">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium text-veloria-cream">
-                            {item.price}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Link
-                              href={`/admin/menu/${item.id}/edit`}
-                              className="text-xs text-veloria-gold-soft hover:text-veloria-gold"
-                            >
-                              Edit
-                            </Link>
-                            <button
-                              onClick={() => handleDeleteItem(item.id)}
-                              className="text-xs text-red-400 hover:text-red-300"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            ))}
-
-            <div className="flex gap-4">
-              <Link
-                href="/admin/sections/new"
-                className="inline-flex items-center justify-center rounded-full border border-veloria-border bg-veloria-elevated/70 px-6 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-veloria-cream hover:bg-veloria-elevated"
-              >
-                + Add Section
-              </Link>
-            </div>
-          </div>
-          </div>
-        </section>
-      </main>
+          </Link>
+        ))}
+      </div>
     </div>
-  );
+  )
 }

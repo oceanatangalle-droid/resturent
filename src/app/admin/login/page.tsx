@@ -1,115 +1,102 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
-export default function AdminLoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+function AdminLoginForm() {
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const from = searchParams.get('from') || '/admin/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+    e.preventDefault()
+    setError('')
+    setLoading(true)
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        return;
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Login failed')
+        setLoading(false)
+        return
       }
-
-      router.push("/admin/dashboard");
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
+      router.push(from)
+      router.refresh()
+    } catch {
+      setError('Something went wrong. Please try again.')
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <main className="min-h-screen bg-veloria-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-veloria-border bg-veloria-elevated/80 p-8">
-          <div className="mb-6 text-center">
-            <Link href="/" className="inline-block mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-veloria-border bg-gradient-to-br from-veloria-gold/40 via-veloria-elevated to-veloria-black text-lg font-semibold text-veloria-black shadow-[0_0_0_1px_rgba(0,0,0,0.7)]">
-                V
-              </div>
-            </Link>
-            <h1 className="text-2xl font-semibold text-veloria-cream mb-2">
-              Admin Login
-            </h1>
-            <p className="text-sm text-veloria-muted">
-              Sign in to manage the menu
-            </p>
+        <div className="bg-zinc-900/95 border border-zinc-800 rounded-2xl p-8 shadow-xl">
+          <div className="flex justify-center mb-6">
+            <span className="w-12 h-12 rounded-xl bg-primary-600 flex items-center justify-center text-white text-xl font-bold">
+              V
+            </span>
           </div>
-
+          <h1 className="text-xl font-semibold text-white text-center mb-1">Admin Login</h1>
+          <p className="text-zinc-400 text-sm text-center mb-6">Veloria Restaurant</p>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-xs text-veloria-muted">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full h-10 rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-xs text-veloria-muted">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
                 Password
               </label>
               <input
-                id="password"
                 type="password"
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-10 rounded-lg border border-veloria-border bg-veloria-black/70 px-3 text-sm text-veloria-cream outline-none ring-0 focus:border-veloria-gold focus:ring-1 focus:ring-veloria-gold/60"
                 required
+                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
+                placeholder="Enter admin password"
+                autoFocus
               />
             </div>
-
+            {error && (
+              <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-10 rounded-full bg-veloria-gold px-6 text-xs font-semibold uppercase tracking-[0.18em] text-veloria-black shadow-[0_18px_40px_rgba(0,0,0,0.75)] transition hover:bg-veloria-gold-soft disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-lg text-sm font-semibold bg-primary-600 hover:bg-primary-500 text-white transition-colors disabled:opacity-50"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/"
-              className="text-xs text-veloria-muted hover:text-veloria-cream"
-            >
-              ← Back to website
+          <p className="mt-6 text-center">
+            <Link href="/" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              ← Back to site
             </Link>
-          </div>
+          </p>
         </div>
       </div>
-    </main>
-  );
+    </div>
+  )
+}
+
+export default function AdminLogin() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+          <div className="w-full max-w-md text-center text-zinc-400">Loading...</div>
+        </div>
+      }
+    >
+      <AdminLoginForm />
+    </Suspense>
+  )
 }

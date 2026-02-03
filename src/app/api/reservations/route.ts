@@ -1,71 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/db';
-import { verifyAuth } from '@/lib/middleware';
+import { NextResponse } from 'next/server'
+import { getReservations, addReservation } from '@/lib/store'
 
-// GET: list reservations (admin only)
-export async function GET(request: NextRequest) {
-  try {
-    const auth = await verifyAuth(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const date = searchParams.get('date');
-
-    let query = 'SELECT * FROM reservations WHERE 1=1';
-    const params: any[] = [];
-    let paramCount = 0;
-
-    if (status) {
-      paramCount++;
-      query += ` AND status = $${paramCount}`;
-      params.push(status);
-    }
-
-    if (date) {
-      paramCount++;
-      query += ` AND reservation_date = $${paramCount}`;
-      params.push(date);
-    }
-
-    query += ' ORDER BY reservation_date DESC, reservation_time DESC, created_at DESC';
-
-    const result = await pool.query(query, params);
-    return NextResponse.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching reservations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch reservations' },
-      { status: 500 }
-    );
-  }
+export async function GET() {
+  const data = await getReservations()
+  return NextResponse.json(data)
 }
 
-// POST: create new reservation (public)
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
+  let body: unknown
   try {
-    const { name, email, phone, reservation_date, reservation_time, guests, notes } = await request.json();
-
-    if (!name || !email || !reservation_date || !reservation_time || !guests) {
-      return NextResponse.json(
-        { error: 'Name, email, date, time, and guests are required' },
-        { status: 400 }
-      );
-    }
-
-    const result = await pool.query(
-      'INSERT INTO reservations (name, email, phone, reservation_date, reservation_time, guests, notes) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [name, email, phone || null, reservation_date, reservation_time, parseInt(guests), notes || null]
-    );
-
-    return NextResponse.json(result.rows[0], { status: 201 });
-  } catch (error) {
-    console.error('Error creating reservation:', error);
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Body must be a JSON object' }, { status: 400 })
+  }
+  const b = body as Record<string, unknown>
+  const name = b.name != null ? String(b.name).trim() : ''
+  const email = b.email != null ? String(b.email).trim() : ''
+  const phone = b.phone != null ? String(b.phone).trim() : ''
+  const date = b.date != null ? String(b.date).trim() : ''
+  const time = b.time != null ? String(b.time).trim() : ''
+  const guests = b.guests != null ? String(b.guests).trim() : ''
+  const specialRequests = b.specialRequests != null ? String(b.specialRequests).trim() : ''
+  if (!name || !email || !phone || !date || !time || !guests) {
     return NextResponse.json(
-      { error: 'Failed to create reservation' },
+      { error: 'Required fields: name, email, phone, date, time, guests' },
+      { status: 400 }
+    )
+  }
+  try {
+    const { id, createdAt } = await addReservation({
+      name,
+      email,
+      phone,
+      date,
+      time,
+      guests,
+      specialRequests,
+    })
+    return NextResponse.json({ id, createdAt })
+  } catch (err) {
+    console.error('addReservation failed:', err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to save reservation' },
       { status: 500 }
-    );
+    )
   }
 }

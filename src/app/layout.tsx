@@ -1,22 +1,33 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import ErrorBoundary from '@/components/ErrorBoundary'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Veloria – Fine Dining Restaurant",
-  description:
-    "Veloria is a premium fine dining restaurant offering curated breakfast, lunch, dinner and drinks in the heart of New York.",
-};
+  title: 'Veloria Restaurant - Fine Dining Experience',
+  description: 'Experience exceptional cuisine in an elegant atmosphere',
+  icons: {
+    icon: '/api/site/favicon',
+  },
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-veloria-black text-veloria-cream antialiased">
-        {children}
+      <body className={inter.className} suppressHydrationWarning>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            {children}
+          </Suspense>
+        </ErrorBoundary>
       </body>
     </html>
-  );
+  )
 }
