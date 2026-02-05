@@ -92,6 +92,15 @@ export const reservations = pgTable('reservations', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+export const contactSubmissions = pgTable('contact_submissions', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 64 }).notNull().default(''),
+  message: text('message').notNull().default(''),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type SiteBrandingRow = typeof siteBranding.$inferSelect
 export type SiteSettingsRow = typeof siteSettings.$inferSelect
 export type MenuCategoryRow = typeof menuCategories.$inferSelect
@@ -99,3 +108,4 @@ export type MenuItemRow = typeof menuItems.$inferSelect
 export type ContactInfoRow = typeof contactInfo.$inferSelect
 export type HomeContentRow = typeof homeContent.$inferSelect
 export type ReservationRow = typeof reservations.$inferSelect
+export type ContactSubmissionRow = typeof contactSubmissions.$inferSelect

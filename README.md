@@ -173,6 +173,13 @@ npm run build
 npm start
 ```
 
+## Deploy to Vercel + Supabase
+
+To host the app on **Vercel** and the database on **Supabase**:
+
+1. Copy `.env.example` to `.env.local` and fill in your Supabase **Transaction pooler** URL as `DATABASE_URL`.
+2. Follow the step-by-step guide in **[DEPLOYMENT.md](./DEPLOYMENT.md)** to create the Supabase project, run migrations, and deploy to Vercel with the right environment variables.
+
 ## Technologies Used
 
 - **Next.js 14**: React framework

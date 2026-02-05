@@ -1,88 +1,71 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
-
-interface SiteSettings {
-  siteName: string
-  facebookUrl: string
-  whatsappUrl: string
-  instagramUrl: string
-  googleBusinessUrl: string
-  tripadvisorUrl: string
-}
+import { useEffect, useRef, useState, memo } from 'react'
+import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
+import { useSettings } from '@/contexts/SettingsContext'
 
 const socialIconClass = 'w-6 h-6 text-gray-500 hover:text-primary-600 transition-colors'
 
-export default function Footer() {
+function Footer() {
+  const settings = useSettings()
   const footerRef = useRef<HTMLElement>(null)
   const columnsRef = useRef<HTMLDivElement>(null)
   const socialRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
-  const [settings, setSettings] = useState<SiteSettings | null>(null)
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => data && setSettings({
-        siteName: data.siteName ?? 'Veloria Restaurant',
-        facebookUrl: data.facebookUrl ?? '',
-        whatsappUrl: data.whatsappUrl ?? '',
-        instagramUrl: data.instagramUrl ?? '',
-        googleBusinessUrl: data.googleBusinessUrl ?? '',
-        tripadvisorUrl: data.tripadvisorUrl ?? '',
-      }))
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    registerGSAP()
-    if (!footerRef.current || !columnsRef.current) return
-    const cols = columnsRef.current.children
-    gsap.fromTo(
-      cols,
-      { y: 32, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.65,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: footerRef.current, start: 'top 92%', toggleActions: 'play none none reverse' },
-      }
-    )
-    if (socialRef.current) {
+    let cancelled = false
+    ensureGSAP().then(() => {
+      if (cancelled || !footerRef.current || !columnsRef.current) return
+      const cols = columnsRef.current.children
       gsap.fromTo(
-        socialRef.current,
-        { y: 16, opacity: 0 },
+        cols,
+        { y: 32, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.5,
-          delay: 0.2,
-          ease: 'power2.out',
+          duration: 0.65,
+          stagger: 0.1,
+          ease: 'power3.out',
           scrollTrigger: { trigger: footerRef.current, start: 'top 92%', toggleActions: 'play none none reverse' },
         }
       )
+      if (socialRef.current) {
+        gsap.fromTo(
+          socialRef.current,
+          { y: 16, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            delay: 0.2,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: footerRef.current, start: 'top 92%', toggleActions: 'play none none reverse' },
+          }
+        )
+      }
+      if (bottomRef.current) {
+        gsap.fromTo(
+          bottomRef.current,
+          { y: 20, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            delay: 0.35,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: footerRef.current, start: 'top 85%', toggleActions: 'play none none reverse' },
+          }
+        )
+      }
+    })
+    return () => {
+      cancelled = true
+      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
-    if (bottomRef.current) {
-      gsap.fromTo(
-        bottomRef.current,
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.5,
-          delay: 0.35,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: footerRef.current, start: 'top 85%', toggleActions: 'play none none reverse' },
-        }
-      )
-    }
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill())
   }, [])
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -124,11 +107,6 @@ export default function Footer() {
               <li>
                 <Link href="/book-a-table" className="hover:text-gray-900 transition-colors">
                   Book a Table
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="hover:text-gray-500 transition-colors">
-                  Admin
                 </Link>
               </li>
             </ul>
@@ -211,3 +189,5 @@ export default function Footer() {
     </footer>
   )
 }
+
+export default memo(Footer)

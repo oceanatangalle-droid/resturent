@@ -1,9 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
+import type { RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
 import PageHeader from '@/components/PageHeader'
 import { formatPrice } from '@/lib/formatPrice'
+import { useSettings } from '@/contexts/SettingsContext'
+import { useLoadMore } from '@/hooks/useInView'
 
 interface MenuItem {
   id: string
@@ -34,6 +37,8 @@ const PRICE_RANGES = [
   { value: '10000+', label: '10000/- and above', min: 10000, max: Infinity },
 ] as const
 
+const INITIAL_BATCH = 12
+const BATCH_SIZE = 12
 const defaultCategories = ['Appetizers', 'Main Courses', 'Desserts', 'Beverages']
 const defaultItems: MenuItem[] = [
   { id: '1', name: 'Bruschetta Trio', description: 'Three varieties of artisanal bruschetta with fresh tomatoes, basil, and mozzarella', price: '$14', category: 'Appetizers' },
@@ -51,14 +56,16 @@ const defaultItems: MenuItem[] = [
 ]
 
 export default function Menu() {
+  const settings = useSettings()
+  const currencySymbol = settings?.currencySymbol ?? '$'
   const [categories, setCategories] = useState<string[]>(defaultCategories)
   const [menuItems, setMenuItems] = useState<MenuItem[]>(defaultItems)
-  const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [logoVisible, setLogoVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [priceRange, setPriceRange] = useState<string>('all')
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH)
   const sectionRef = useRef<HTMLElement>(null)
   const categoryRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -66,13 +73,16 @@ export default function Menu() {
     Promise.all([
       fetch('/api/menu/categories').then((r) => r.ok ? r.json() : []),
       fetch('/api/menu/items').then((r) => r.ok ? r.json() : []),
-      fetch('/api/settings').then((r) => r.ok ? r.json() : { currencySymbol: '$', currencyCode: 'USD' }),
-    ]).then(([catList, itemList, siteSettings]: [{ name: string }[], MenuItem[], SiteSettings]) => {
+    ]).then(([catList, itemList]: [{ name: string }[], MenuItem[]]) => {
       if (catList?.length) setCategories(catList.map((c) => c.name))
       if (itemList?.length) setMenuItems(itemList)
-      setSettings(siteSettings ?? { currencySymbol: '$', currencyCode: 'USD' })
-    }).catch(() => setSettings({ currencySymbol: '$', currencyCode: 'USD' }))
+    }).catch(() => {})
   }, [])
+
+  // Reset visible count when filters change so infinite scroll starts fresh
+  useEffect(() => {
+    setVisibleCount(INITIAL_BATCH)
+  }, [searchQuery, selectedCategory, priceRange])
 
   const filteredItems = useMemo(() => {
     let items = menuItems
@@ -110,6 +120,18 @@ export default function Menu() {
     return categories.filter((c) => hasItems.has(c))
   }, [categories, filteredItems, selectedCategory])
 
+  // Flatten items in category order for infinite scroll
+  const flatItems = useMemo(
+    () => categoriesToShow.flatMap((cat) => filteredItems.filter((i) => i.category === cat)),
+    [categoriesToShow, filteredItems]
+  )
+  const visibleItems = useMemo(() => flatItems.slice(0, visibleCount), [flatItems, visibleCount])
+  const hasMore = visibleCount < flatItems.length
+  const loadMore = useCallback(() => {
+    setVisibleCount((c) => Math.min(c + BATCH_SIZE, flatItems.length))
+  }, [flatItems.length])
+  const loadMoreRef = useLoadMore(loadMore, hasMore)
+
   useEffect(() => {
     const onScroll = () => setShowScrollTop(typeof window !== 'undefined' && window.scrollY > 300)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -118,39 +140,46 @@ export default function Menu() {
   }, [])
 
   useEffect(() => {
-    registerGSAP()
-    const ctx = gsap.context(() => {
-      categoryRefs.current.forEach((el, i) => {
-        if (!el) return
-        const cards = el.querySelector('.menu-cards')
-        const heading = el.querySelector('h2')
-        if (heading) {
-          gsap.from(heading, {
-            scrollTrigger: { trigger: el, start: 'top 82%', toggleActions: 'play none none reverse' },
-            y: 36,
-            opacity: 0,
-            duration: 0.7,
-            ease: 'power3.out',
-          })
-        }
-        if (cards?.children?.length) {
-          gsap.from(cards.children, {
-            scrollTrigger: { trigger: el, start: 'top 78%', toggleActions: 'play none none reverse' },
-            y: 44,
-            opacity: 0,
-            stagger: 0.06,
-            duration: 0.6,
-            ease: 'power3.out',
-          })
-          Array.from(cards.children).forEach((card) => {
-            const c = card as HTMLElement
-            c.addEventListener('mouseenter', () => gsap.to(c, { scale: 1.02, duration: 0.3, ease: 'power2.out' }))
-            c.addEventListener('mouseleave', () => gsap.to(c, { scale: 1, duration: 0.3, ease: 'power2.out' }))
-          })
-        }
-      })
-    }, sectionRef)
-    return () => ctx.revert()
+    let cancelled = false
+    let ctx: { revert: () => void } | null = null
+    ensureGSAP().then(() => {
+      if (cancelled) return
+      ctx = gsap.context(() => {
+        categoryRefs.current.forEach((el) => {
+          if (!el) return
+          const cards = el.querySelector('.menu-cards')
+          const heading = el.querySelector('h2')
+          if (heading) {
+            gsap.from(heading, {
+              scrollTrigger: { trigger: el, start: 'top 82%', toggleActions: 'play none none reverse' },
+              y: 36,
+              opacity: 0,
+              duration: 0.7,
+              ease: 'power3.out',
+            })
+          }
+          if (cards?.children?.length) {
+            gsap.from(cards.children, {
+              scrollTrigger: { trigger: el, start: 'top 78%', toggleActions: 'play none none reverse' },
+              y: 44,
+              opacity: 0,
+              stagger: 0.06,
+              duration: 0.6,
+              ease: 'power3.out',
+            })
+            Array.from(cards.children).forEach((card) => {
+              const c = card as HTMLElement
+              c.addEventListener('mouseenter', () => gsap.to(c, { scale: 1.02, duration: 0.3, ease: 'power2.out' }))
+              c.addEventListener('mouseleave', () => gsap.to(c, { scale: 1, duration: 0.3, ease: 'power2.out' }))
+            })
+          }
+        })
+      }, sectionRef)
+    })
+    return () => {
+      cancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (
@@ -235,37 +264,50 @@ export default function Menu() {
               No dishes match your search or filters. Try adjusting them.
             </p>
           ) : (
-            categoriesToShow.map((category, index) => {
-              const items = filteredItems.filter((item) => item.category === category)
-              if (items.length === 0) return null
-              return (
-                <div
-                  key={category}
-                  ref={(el) => { categoryRefs.current[index] = el }}
-                  className="mb-10 sm:mb-16"
-                >
-                  <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-900 border-b-2 border-primary-600 pb-3 sm:pb-4 px-2">
-                    {category}
-                  </h2>
-                  <div className="menu-cards grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-white opacity-100 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 shadow-sm min-w-0"
-                      >
-                        <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
-                          <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 break-words">{item.name}</h3>
-                          <span className="text-primary-500 font-bold text-base sm:text-lg flex-shrink-0">{formatPrice(item.price, settings?.currencySymbol ?? '$')}</span>
+            <>
+              {(() => {
+                const groups: { category: string; items: MenuItem[] }[] = []
+                let lastCat = ''
+                visibleItems.forEach((item) => {
+                  if (item.category !== lastCat) {
+                    groups.push({ category: item.category, items: [item] })
+                    lastCat = item.category
+                  } else {
+                    groups[groups.length - 1].items.push(item)
+                  }
+                })
+                return groups.map((group, index) => (
+                  <div
+                    key={`${group.category}-${index}`}
+                    ref={(el) => { categoryRefs.current[index] = el }}
+                    className="mb-10 sm:mb-16"
+                  >
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-900 border-b-2 border-primary-600 pb-3 sm:pb-4 px-2">
+                      {group.category}
+                    </h2>
+                    <div className="menu-cards grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                      {group.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="bg-white opacity-100 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 shadow-sm min-w-0 min-h-[120px]"
+                        >
+                          <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
+                            <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 break-words">{item.name}</h3>
+                            <span className="text-primary-500 font-bold text-base sm:text-lg flex-shrink-0">{formatPrice(item.price, currencySymbol)}</span>
+                          </div>
+                          {item.description && (
+                            <p className="text-gray-600">{item.description}</p>
+                          )}
                         </div>
-                        {item.description && (
-                          <p className="text-gray-600">{item.description}</p>
-                        )}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            })
+                ))
+              })()}
+              {hasMore && (
+                <div ref={loadMoreRef as RefObject<HTMLDivElement>} className="h-4 w-full" aria-hidden />
+              )}
+            </>
           )}
         </div>
       </section>
@@ -279,6 +321,10 @@ export default function Menu() {
         <img
           src="/api/site/logo"
           alt=""
+          loading="lazy"
+          decoding="async"
+          width={320}
+          height={200}
           className="max-w-[min(240px,85vw)] sm:max-w-[min(280px,40vw)] md:max-w-[min(320px,40vw)] w-auto max-h-[40vh] sm:max-h-[50vh] object-contain opacity-30"
           onLoad={() => setLogoVisible(true)}
           onError={() => setLogoVisible(false)}

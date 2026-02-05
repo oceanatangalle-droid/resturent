@@ -9,6 +9,7 @@ import {
   IconContact,
   IconHome,
   IconReservations,
+  IconMail,
   IconBranding,
   IconSettings,
   IconExternal,
@@ -23,6 +24,7 @@ const links = [
   { href: '/admin/branding', label: 'Branding', icon: IconBranding },
   { href: '/admin/settings', label: 'Settings', icon: IconSettings },
   { href: '/admin/reservations', label: 'Reservations', icon: IconReservations },
+  { href: '/admin/contact-messages', label: 'Contact messages', icon: IconMail },
 ]
 
 export default function AdminSidebar() {

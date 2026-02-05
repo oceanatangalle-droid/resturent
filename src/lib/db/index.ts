@@ -8,7 +8,14 @@ if (!connectionString) {
   console.warn('DATABASE_URL is not set. Admin and API data will not persist.')
 }
 
-const pool = connectionString ? new Pool({ connectionString }) : null
+// Supabase and most cloud Postgres require SSL; enable it when using Supabase
+const isSupabase = connectionString?.includes('supabase.com')
+const pool = connectionString
+  ? new Pool({
+      connectionString,
+      ...(isSupabase && { ssl: { rejectUnauthorized: false } }),
+    })
+  : null
 
 export const db = pool ? drizzle(pool, { schema }) : null
 export { schema }

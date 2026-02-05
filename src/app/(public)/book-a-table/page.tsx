@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
+import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
 import PageHeader from '@/components/PageHeader'
 
 export default function BookATable() {
@@ -21,31 +21,37 @@ export default function BookATable() {
   const policyRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    registerGSAP()
-    if (formCardRef.current) {
-      gsap.fromTo(
-        formCardRef.current,
-        { y: 48, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', delay: 0.15 }
-      )
-      const formEl = formCardRef.current.querySelector('form')
-      const rows = formEl ? Array.from(formEl.querySelectorAll(':scope > div')) : []
-      if (rows.length) {
+    let cancelled = false
+    ensureGSAP().then(() => {
+      if (cancelled) return
+      if (formCardRef.current) {
         gsap.fromTo(
-          rows,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.5, stagger: 0.05, delay: 0.35, ease: 'power2.out' }
+          formCardRef.current,
+          { y: 48, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', delay: 0.15 }
+        )
+        const formEl = formCardRef.current.querySelector('form')
+        const rows = formEl ? Array.from(formEl.querySelectorAll(':scope > div')) : []
+        if (rows.length) {
+          gsap.fromTo(
+            rows,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.05, delay: 0.35, ease: 'power2.out' }
+          )
+        }
+      }
+      if (policyRef.current) {
+        gsap.fromTo(
+          policyRef.current,
+          { y: 24, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.6 }
         )
       }
+    })
+    return () => {
+      cancelled = true
+      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
-    if (policyRef.current) {
-      gsap.fromTo(
-        policyRef.current,
-        { y: 24, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.6 }
-      )
-    }
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill())
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -8,6 +8,7 @@ import {
   siteBranding,
   siteSettings,
   reservations as reservationsTable,
+  contactSubmissions as contactSubmissionsTable,
 } from './db/schema'
 
 export interface MenuCategory {
@@ -89,6 +90,15 @@ export interface Reservation {
   createdAt: string
 }
 
+export interface ContactSubmission {
+  id: string
+  name: string
+  email: string
+  phone: string
+  message: string
+  createdAt: string
+}
+
 // ---- In-memory fallback when DATABASE_URL is not set ----
 const defaultCategories: MenuCategory[] = [
   { id: '1', name: 'Appetizers', sortOrder: 1 },
@@ -146,6 +156,7 @@ let memoryItems = [...defaultItems]
 let memoryContact = { ...defaultContact }
 let memoryHome = { ...defaultHome }
 const memoryReservations: Reservation[] = []
+const memoryContactSubmissions: ContactSubmission[] = []
 let memoryBranding: SiteBrandingData = { faviconBase64: '', logoBase64: '' }
 let memorySettings: SiteSettingsData = {
   siteName: 'Veloria Restaurant',
@@ -502,5 +513,53 @@ export async function addReservation(data: Omit<Reservation, 'id' | 'createdAt' 
     return { id, createdAt }
   }
   memoryReservations.push({ ...data, id, createdAt, status: 'pending' })
+  return { id, createdAt }
+}
+
+function rowToContactSubmission(r: {
+  id: number
+  name: string
+  email: string
+  phone: string
+  message: string
+  createdAt: Date
+}): ContactSubmission {
+  return {
+    id: String(r.id),
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    message: r.message,
+    createdAt: r.createdAt.toISOString(),
+  }
+}
+
+export async function getContactSubmissions(): Promise<ContactSubmission[]> {
+  if (db) {
+    const rows = await db.select().from(contactSubmissionsTable).orderBy(desc(contactSubmissionsTable.createdAt))
+    return rows.map(rowToContactSubmission)
+  }
+  return [...memoryContactSubmissions].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
+}
+
+export async function addContactSubmission(data: Omit<ContactSubmission, 'id' | 'createdAt'>): Promise<{ id: string; createdAt: string }> {
+  const id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const createdAt = new Date().toISOString()
+  if (db) {
+    const [row] = await db
+      .insert(contactSubmissionsTable)
+      .values({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        message: data.message,
+      })
+      .returning({ id: contactSubmissionsTable.id, createdAt: contactSubmissionsTable.createdAt })
+    if (!row) throw new Error('Insert failed')
+    return { id: String(row.id), createdAt: row.createdAt.toISOString() }
+  }
+  memoryContactSubmissions.push({ ...data, id, createdAt })
   return { id, createdAt }
 }

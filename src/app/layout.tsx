@@ -5,7 +5,7 @@ import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { getSettings } from '@/lib/store'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -16,12 +16,25 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings()
   const siteName = settings?.siteName ?? 'Veloria Restaurant'
+  const title = `${siteName} - Fine Dining Experience`
+  const description = 'Experience exceptional cuisine in an elegant atmosphere. Reserve your table and explore our menu.'
   return {
-    title: `${siteName} - Fine Dining Experience`,
-    description: 'Experience exceptional cuisine in an elegant atmosphere',
+    title,
+    description,
     icons: {
       icon: '/api/site/favicon',
     },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+    robots: 'index, follow',
   }
 }
 

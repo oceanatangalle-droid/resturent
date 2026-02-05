@@ -1,16 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { memo } from 'react'
+import { useSettings } from '@/contexts/SettingsContext'
 
-export default function WhatsAppButton() {
-  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => data?.whatsappUrl && setWhatsappUrl(data.whatsappUrl))
-      .catch(() => {})
-  }, [])
+function WhatsAppButton() {
+  const settings = useSettings()
+  const whatsappUrl = settings?.whatsappUrl ?? null
 
   if (!whatsappUrl) return null
 
@@ -37,3 +32,5 @@ export default function WhatsAppButton() {
     </a>
   )
 }
+
+export default memo(WhatsAppButton)

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { IconMenu, IconReservations, IconContact, IconHome, IconBranding, IconSpecialOffer, IconSettings } from '@/components/admin/AdminIcons'
+import { IconMenu, IconReservations, IconContact, IconHome, IconBranding, IconSpecialOffer, IconSettings, IconMail } from '@/components/admin/AdminIcons'
 
 const cards = [
   { href: '/admin/menu', title: 'Menu', desc: 'Categories & items', icon: IconMenu },
@@ -13,19 +13,25 @@ const cards = [
   { href: '/admin/branding', title: 'Branding', desc: 'Favicon & logo', icon: IconBranding },
   { href: '/admin/settings', title: 'Settings', desc: 'Currency & site options', icon: IconSettings },
   { href: '/admin/reservations', title: 'Reservations', desc: 'Book table requests', icon: IconReservations },
+  { href: '/admin/contact-messages', title: 'Contact messages', desc: 'Contact Us form submissions', icon: IconMail },
 ]
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<{ reservations: number; menuItems: number } | null>(null)
+  const [stats, setStats] = useState<{ reservations: number; contactMessages: number; menuItems: number } | null>(null)
 
   useEffect(() => {
-    Promise.all([fetch('/api/reservations'), fetch('/api/menu/items')])
-      .then(async ([resRes, itemsRes]) => {
+    Promise.all([
+      fetch('/api/reservations'),
+      fetch('/api/contact-submissions'),
+      fetch('/api/menu/items'),
+    ])
+      .then(async ([resRes, messagesRes, itemsRes]) => {
         const reservations = resRes.ok ? (await resRes.json()).length : 0
+        const contactMessages = messagesRes.ok ? (await messagesRes.json()).length : 0
         const menuItems = itemsRes.ok ? (await itemsRes.json()).length : 0
-        setStats({ reservations, menuItems })
+        setStats({ reservations, contactMessages, menuItems })
       })
-      .catch(() => setStats({ reservations: 0, menuItems: 0 }))
+      .catch(() => setStats({ reservations: 0, contactMessages: 0, menuItems: 0 }))
   }, [])
 
   return (
@@ -35,11 +41,16 @@ export default function AdminDashboard() {
         subtitle="Manage your restaurant content and reservations."
       />
       {stats !== null && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
             <p className="text-sm font-medium text-zinc-400">Reservations</p>
             <p className="text-2xl font-semibold text-white mt-1">{stats.reservations}</p>
             <p className="text-xs text-zinc-500 mt-1">Total bookings</p>
+          </div>
+          <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+            <p className="text-sm font-medium text-zinc-400">Contact messages</p>
+            <p className="text-2xl font-semibold text-white mt-1">{stats.contactMessages}</p>
+            <p className="text-xs text-zinc-500 mt-1">From Contact Us form</p>
           </div>
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
             <p className="text-sm font-medium text-zinc-400">Menu items</p>

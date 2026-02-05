@@ -1,14 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef } from 'react'
-import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
+import { useState, useEffect, useRef, memo } from 'react'
+import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
+import { useSettings } from '@/contexts/SettingsContext'
 
-export default function Navigation() {
+function Navigation() {
+  const settings = useSettings()
+  const siteName = settings?.siteName?.replace(/\s+Restaurant\s*$/i, '') || settings?.siteName || 'Veloria'
   const [isOpen, setIsOpen] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoError, setLogoError] = useState(false)
-  const [siteName, setSiteName] = useState<string>('Veloria')
   const [mounted, setMounted] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
@@ -34,34 +36,32 @@ export default function Navigation() {
   }, [mounted])
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d?.siteName && setSiteName(d.siteName))
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    registerGSAP()
-    if (!navRef.current) return
-    gsap.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' })
-    if (logoRef.current) {
-      gsap.fromTo(logoRef.current, { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: 'power3.out' })
+    let cancelled = false
+    ensureGSAP().then(() => {
+      if (cancelled || !navRef.current) return
+      gsap.fromTo(navRef.current, { y: -100, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' })
+      if (logoRef.current) {
+        gsap.fromTo(logoRef.current, { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, delay: 0.2, ease: 'power3.out' })
+      }
+      if (linksRef.current) {
+        gsap.fromTo(linksRef.current.children, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, delay: 0.3, ease: 'power3.out' })
+      }
+      if (innerRef.current) {
+        gsap.fromTo(
+          innerRef.current,
+          { height: 64 },
+          {
+            height: 56,
+            ease: 'none',
+            scrollTrigger: { trigger: document.body, start: '120px top', end: '280px top', scrub: 0.8 },
+          }
+        )
+      }
+    })
+    return () => {
+      cancelled = true
+      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
-    if (linksRef.current) {
-      gsap.fromTo(linksRef.current.children, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, stagger: 0.06, delay: 0.3, ease: 'power3.out' })
-    }
-    if (innerRef.current) {
-      gsap.fromTo(
-        innerRef.current,
-        { height: 64 },
-        {
-          height: 56,
-          ease: 'none',
-          scrollTrigger: { trigger: document.body, start: '120px top', end: '280px top', scrub: 0.8 },
-        }
-      )
-    }
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill())
   }, [])
 
   // Only show img after mount to avoid hydration mismatch (server and first client paint both show text)
@@ -157,3 +157,5 @@ export default function Navigation() {
     </nav>
   )
 }
+
+export default memo(Navigation)

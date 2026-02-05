@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
-import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
+import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
 import PageHeader from '@/components/PageHeader'
 
 interface ContactInfo {
@@ -28,6 +28,7 @@ const defaultContact: ContactInfo = {
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
   const [contactInfo, setContactInfo] = useState<ContactInfo>(defaultContact)
   const contentRef = useRef<HTMLDivElement>(null)
   const leftRef = useRef<HTMLDivElement>(null)
@@ -41,40 +42,66 @@ export default function Contact() {
   }, [])
 
   useEffect(() => {
-    registerGSAP()
-    if (leftRef.current) {
-      gsap.fromTo(leftRef.current, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.15 })
-      const infoBlocks = leftRef.current.querySelectorAll('.flex.items-start')
-      if (infoBlocks.length) {
-        gsap.fromTo(
-          infoBlocks,
-          { x: -24, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.35, ease: 'power2.out' }
-        )
+    let cancelled = false
+    ensureGSAP().then(() => {
+      if (cancelled) return
+      if (leftRef.current) {
+        gsap.fromTo(leftRef.current, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.15 })
+        const infoBlocks = leftRef.current.querySelectorAll('.flex.items-start')
+        if (infoBlocks.length) {
+          gsap.fromTo(
+            infoBlocks,
+            { x: -24, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.35, ease: 'power2.out' }
+          )
+        }
       }
-    }
-    if (formRef.current) {
-      gsap.fromTo(formRef.current, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.3 })
-      const formWrapper = formRef.current.querySelector('.bg-white')
-      const formGroups = formWrapper?.querySelectorAll('.space-y-6 > div')
-      if (formGroups?.length) {
-        gsap.fromTo(
-          formGroups,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.45, stagger: 0.06, delay: 0.45, ease: 'power2.out' }
-        )
+      if (formRef.current) {
+        gsap.fromTo(formRef.current, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.3 })
+        const formWrapper = formRef.current.querySelector('.bg-white')
+        const formGroups = formWrapper?.querySelectorAll('.space-y-6 > div')
+        if (formGroups?.length) {
+          gsap.fromTo(
+            formGroups,
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.45, stagger: 0.06, delay: 0.45, ease: 'power2.out' }
+          )
+        }
       }
+    })
+    return () => {
+      cancelled = true
+      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill())
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setSubmitted(true)
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/contact-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setFormData({ name: '', email: '', phone: '', message: '' })
+        setTimeout(() => setSubmitted(false), 5000)
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.')
+        setSubmitted(false)
+      }
+    } catch {
+      setError('Something went wrong. Please check your connection.')
       setSubmitted(false)
-      setFormData({ name: '', email: '', phone: '', message: '' })
-    }, 3000)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -233,7 +260,12 @@ export default function Contact() {
                     />
                   </div>
 
-                  {submitted && (
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm" role="alert">
+                      {error}
+                    </div>
+                  )}
+                  {submitted && !error && (
                     <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm" role="status">
                       Thank you! Your message has been sent successfully. We&apos;ll get back to you soon.
                     </div>

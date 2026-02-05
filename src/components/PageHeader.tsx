@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { gsap, registerGSAP } from '@/lib/animations'
+import { gsap, ensureGSAP } from '@/lib/animations'
 
 interface PageHeaderProps {
   title: string
@@ -15,13 +15,16 @@ export default function PageHeader({ title, subtitle }: PageHeaderProps) {
   const subtitleRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
-    registerGSAP()
-    if (!sectionRef.current) return
-    gsap.fromTo(titleRef.current, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 })
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current, { scaleX: 0, transformOrigin: 'center' }, { scaleX: 1, duration: 0.6, ease: 'power2.out', delay: 0.35 })
-    }
-    gsap.fromTo(subtitleRef.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.45 })
+    let cancelled = false
+    ensureGSAP().then(() => {
+      if (cancelled || !sectionRef.current) return
+      gsap.fromTo(titleRef.current, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 })
+      if (lineRef.current) {
+        gsap.fromTo(lineRef.current, { scaleX: 0, transformOrigin: 'center' }, { scaleX: 1, duration: 0.6, ease: 'power2.out', delay: 0.35 })
+      }
+      gsap.fromTo(subtitleRef.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.45 })
+    })
+    return () => { cancelled = true }
   }, [])
 
   return (
