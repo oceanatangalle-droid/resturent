@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import {
   getReservationById,
   updateReservationStatus,
+  getSettings,
   type ReservationStatus,
 } from '@/lib/store'
 import { sendEmail } from '@/lib/gmail'
@@ -19,12 +20,13 @@ function reservationEmailHtml(
   date: string,
   time: string,
   guests: string,
-  status: 'accepted' | 'rejected'
+  status: 'accepted' | 'rejected',
+  siteName: string
 ): string {
   const body =
     status === 'accepted'
-      ? `Dear ${name},<br><br>Your table reservation for <strong>${date}</strong> at <strong>${time}</strong> for <strong>${guests} guests</strong> has been confirmed. We look forward to seeing you.<br><br>— Veloria Restaurant`
-      : `Dear ${name},<br><br>Unfortunately we are unable to confirm your reservation for ${date} at ${time}. Please call us or try another date/time.<br><br>— Veloria Restaurant`
+      ? `Dear ${name},<br><br>Your table reservation for <strong>${date}</strong> at <strong>${time}</strong> for <strong>${guests} guests</strong> has been confirmed. We look forward to seeing you.<br><br>— ${siteName}`
+      : `Dear ${name},<br><br>Unfortunately we are unable to confirm your reservation for ${date} at ${time}. Please call us or try another date/time.<br><br>— ${siteName}`
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;line-height:1.6;color:#333;">${body}</body></html>`
 }
 
@@ -51,17 +53,22 @@ export async function POST(
   const updated = await updateReservationStatus(id, status)
   if (!updated) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
 
+  const settings = await getSettings()
+  const siteName = settings?.siteName ?? 'Veloria Restaurant'
+  const siteShortName = siteName.replace(/\s+Restaurant\s*$/i, '') || siteName
+
   try {
     const subject =
       status === 'accepted'
-        ? 'Your reservation at Veloria is confirmed'
-        : 'Update on your reservation at Veloria'
+        ? `Your reservation at ${siteShortName} is confirmed`
+        : `Update on your reservation at ${siteShortName}`
     const html = reservationEmailHtml(
       reservation.name,
       reservation.date,
       reservation.time,
       reservation.guests,
-      status as 'accepted' | 'rejected'
+      status as 'accepted' | 'rejected',
+      siteName
     )
     await sendEmail(reservation.email, subject, html)
   } catch (err) {

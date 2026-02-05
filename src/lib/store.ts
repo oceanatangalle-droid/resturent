@@ -63,8 +63,14 @@ export interface SiteBrandingData {
 }
 
 export interface SiteSettingsData {
+  siteName: string
   currencySymbol: string
   currencyCode: string
+  facebookUrl: string
+  whatsappUrl: string
+  instagramUrl: string
+  googleBusinessUrl: string
+  tripadvisorUrl: string
 }
 
 export type ReservationStatus = 'pending' | 'accepted' | 'rejected'
@@ -141,7 +147,16 @@ let memoryContact = { ...defaultContact }
 let memoryHome = { ...defaultHome }
 const memoryReservations: Reservation[] = []
 let memoryBranding: SiteBrandingData = { faviconBase64: '', logoBase64: '' }
-let memorySettings: SiteSettingsData = { currencySymbol: '$', currencyCode: 'USD' }
+let memorySettings: SiteSettingsData = {
+  siteName: 'Veloria Restaurant',
+  currencySymbol: '$',
+  currencyCode: 'USD',
+  facebookUrl: '',
+  whatsappUrl: '',
+  instagramUrl: '',
+  googleBusinessUrl: '',
+  tripadvisorUrl: '',
+}
 let nextCategoryId = 5
 let nextItemId = 13
 
@@ -346,8 +361,14 @@ export async function getSettings(): Promise<SiteSettingsData> {
     const [row] = await db.select().from(siteSettings).where(eq(siteSettings.id, 1))
     if (row)
       return {
+        siteName: (row as { siteName?: string }).siteName ?? 'Veloria Restaurant',
         currencySymbol: row.currencySymbol ?? '$',
         currencyCode: row.currencyCode ?? 'USD',
+        facebookUrl: (row as { facebookUrl?: string }).facebookUrl ?? '',
+        whatsappUrl: (row as { whatsappUrl?: string }).whatsappUrl ?? '',
+        instagramUrl: (row as { instagramUrl?: string }).instagramUrl ?? '',
+        googleBusinessUrl: (row as { googleBusinessUrl?: string }).googleBusinessUrl ?? '',
+        tripadvisorUrl: (row as { tripadvisorUrl?: string }).tripadvisorUrl ?? '',
       }
   }
   return { ...memorySettings }
@@ -356,16 +377,41 @@ export async function getSettings(): Promise<SiteSettingsData> {
 export async function updateSettings(data: Partial<SiteSettingsData>): Promise<SiteSettingsData> {
   const current = await getSettings()
   const next: SiteSettingsData = {
+    siteName: data.siteName !== undefined ? data.siteName : current.siteName,
     currencySymbol: data.currencySymbol !== undefined ? data.currencySymbol : current.currencySymbol,
     currencyCode: data.currencyCode !== undefined ? data.currencyCode : current.currencyCode,
+    facebookUrl: data.facebookUrl !== undefined ? data.facebookUrl : current.facebookUrl,
+    whatsappUrl: data.whatsappUrl !== undefined ? data.whatsappUrl : current.whatsappUrl,
+    instagramUrl: data.instagramUrl !== undefined ? data.instagramUrl : current.instagramUrl,
+    googleBusinessUrl: data.googleBusinessUrl !== undefined ? data.googleBusinessUrl : current.googleBusinessUrl,
+    tripadvisorUrl: data.tripadvisorUrl !== undefined ? data.tripadvisorUrl : current.tripadvisorUrl,
   }
   if (db) {
     await db
       .insert(siteSettings)
-      .values({ id: 1, currencySymbol: next.currencySymbol, currencyCode: next.currencyCode })
+      .values({
+        id: 1,
+        siteName: next.siteName,
+        currencySymbol: next.currencySymbol,
+        currencyCode: next.currencyCode,
+        facebookUrl: next.facebookUrl,
+        whatsappUrl: next.whatsappUrl,
+        instagramUrl: next.instagramUrl,
+        googleBusinessUrl: next.googleBusinessUrl,
+        tripadvisorUrl: next.tripadvisorUrl,
+      })
       .onConflictDoUpdate({
         target: siteSettings.id,
-        set: { currencySymbol: next.currencySymbol, currencyCode: next.currencyCode },
+        set: {
+          siteName: next.siteName,
+          currencySymbol: next.currencySymbol,
+          currencyCode: next.currencyCode,
+          facebookUrl: next.facebookUrl,
+          whatsappUrl: next.whatsappUrl,
+          instagramUrl: next.instagramUrl,
+          googleBusinessUrl: next.googleBusinessUrl,
+          tripadvisorUrl: next.tripadvisorUrl,
+        },
       })
     return getSettings()
   }

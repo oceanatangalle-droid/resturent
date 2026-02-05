@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Script from 'next/script'
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, registerGSAP } from '@/lib/animations'
 import { formatPrice } from '@/lib/formatPrice'
@@ -279,12 +280,12 @@ export default function Home() {
   return (
     <div ref={containerRef} className="min-h-screen bg-white">
       {/* Hero Widget */}
-      <section ref={heroRef} className="relative min-h-[85vh] flex items-center bg-white text-gray-900 overflow-hidden">
+      <section ref={heroRef} className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] flex items-center bg-white text-gray-900 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(220,38,38,0.08) 0%, transparent 50%)' }} />
-        <div className="section-container relative z-10 w-full py-24 md:py-32">
-          <div ref={heroContentRef} className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight flex flex-wrap gap-x-3 gap-y-1 text-gray-900">
+        <div className="section-container relative z-10 w-full py-12 sm:py-16 md:py-24 lg:py-32">
+          <div ref={heroContentRef} className="max-w-3xl w-full">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 tracking-tight flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 text-gray-900">
               {(homeContent.heroWords.length ? homeContent.heroWords : ['Welcome', 'to', 'Veloria']).map((word, i) => (
                 <span key={`${word}-${i}`} ref={(el) => { if (el) titleWordsRef.current[i] = el }} className="inline-block">
                   {word}
@@ -293,44 +294,79 @@ export default function Home() {
             </h1>
             <p
               ref={subtitleRef}
-              className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 md:mb-10 max-w-2xl"
             >
               {homeContent.subtitle}
             </p>
-            <div
-              ref={buttonsRef}
-              className="flex flex-col sm:flex-row gap-4"
-            >
-              <Link href="/book-a-table" className="btn-primary text-center">
-                Reserve Your Table
-              </Link>
-              <Link href="/menu" className="btn-secondary text-center">
-                View Our Menu
-              </Link>
+            <div ref={buttonsRef} className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link href="/book-a-table" className="btn-primary text-center">
+                  Reserve Your Table
+                </Link>
+                <Link href="/menu" className="btn-secondary text-center">
+                  View Our Menu
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('reviews-tripadvisor')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00AF87]"
+                  style={{ backgroundColor: '#00AF87' }}
+                  aria-label="Scroll to TripAdvisor reviews"
+                >
+                  {/* TripAdvisor logo (owl/bubble mark) */}
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" aria-hidden>
+                    <path d="M12.006 4.295c-2.67 0-5.338.784-7.645 2.353H0l2.363 2.638a.582.582 0 0 1-.375.958H.192v3.016h1.15a.582.582 0 0 1 .375.957L0 14.875h4.361a8.385 8.385 0 0 0 7.645 5.083 8.385 8.385 0 0 0 7.646-5.083h4.36l-2.362-2.638a.582.582 0 0 1 .375-.957h1.15V8.244h-1.15a.582.582 0 0 1-.375-.958L24 4.295h-4.361a8.385 8.385 0 0 0-7.633-5.083zm-.027 10.652a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626zm7.646-3.313a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('reviews-google')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                  style={{ backgroundColor: '#fff', border: '2px solid #e8eaed' }}
+                  aria-label="Scroll to Google reviews"
+                >
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden>
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Google Reviews (Elfsight) */}
+      <section id="reviews-google" className="py-8 sm:py-12 md:py-16 bg-white border-y border-gray-200 overflow-hidden scroll-mt-20">
+        <div className="section-container">
+          <Script src="https://elfsightcdn.com/platform.js" strategy="lazyOnload" />
+          <div className="elfsight-app-d90e30fa-b02f-4784-abda-018adaadb207" data-elfsight-app-lazy />
+        </div>
+      </section>
+
       {/* Special Offer Section (editable in Admin > Home / Special Offer) */}
       {homeContent.discountVisible !== false && (
-        <section ref={discountRef} className="py-12 md:py-16 bg-gray-100 border-y border-gray-200">
+        <section ref={discountRef} className="py-8 sm:py-12 md:py-16 bg-gray-100 border-y border-gray-200">
           <div className="section-container">
-            <div className={`max-w-5xl mx-auto ${homeContent.discountImageBase64 ? 'flex flex-col md:flex-row md:items-center gap-8 md:gap-12' : 'text-center'}`}>
+            <div className={`max-w-5xl mx-auto ${homeContent.discountImageBase64 ? 'flex flex-col md:flex-row md:items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12' : 'text-center'}`}>
               {homeContent.discountImageBase64 && (
-                <div className="flex-shrink-0 mx-auto md:mx-0">
+                <div className="flex-shrink-0 mx-auto md:mx-0 w-full max-w-[280px] sm:max-w-xs md:w-[38%] md:max-w-[360px]">
                   <img
                     src={homeContent.discountImageBase64}
                     alt={homeContent.discountTitle ?? 'Special Offer'}
-                    className="rounded-xl shadow-lg max-h-64 w-auto object-cover"
+                    className="rounded-xl shadow-lg max-h-48 sm:max-h-56 md:max-h-64 w-full h-auto object-cover"
                   />
                 </div>
               )}
-              <div className={homeContent.discountImageBase64 ? 'flex-1 text-center md:text-left' : 'max-w-3xl mx-auto text-center'}>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <div className={homeContent.discountImageBase64 ? 'flex-1 min-w-0 text-center md:text-left' : 'max-w-3xl mx-auto text-center'}>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
                   {homeContent.discountTitle ?? 'Special Offer'}
                 </h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
                   {homeContent.discountSubtitle ?? 'Enjoy 20% off your next dinner when you book online. Limited time only.'}
                 </p>
                 <Link
@@ -345,15 +381,22 @@ export default function Home() {
         </section>
       )}
 
-      {/* About Section */}
-      <section ref={aboutRef} className="py-20 bg-white">
+      {/* Tripadvisor Reviews (Elfsight) */}
+      <section id="reviews-tripadvisor" className="py-8 sm:py-12 md:py-16 bg-white border-y border-gray-200 overflow-hidden scroll-mt-20">
         <div className="section-container">
-          <div ref={aboutContentRef} className="max-w-3xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+          <div className="elfsight-app-b29f3b82-39f0-432b-a569-e92275647c5b" data-elfsight-app-lazy />
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section ref={aboutRef} className="py-12 sm:py-16 md:py-20 bg-white">
+        <div className="section-container">
+          <div ref={aboutContentRef} className="max-w-3xl mx-auto text-center w-full">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-gray-900">
               {homeContent.aboutTitle}
             </h2>
-            <div ref={aboutLineRef} className="w-20 h-0.5 bg-primary-500 mx-auto mb-6" />
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <div ref={aboutLineRef} className="w-20 h-0.5 bg-primary-500 mx-auto mb-4 sm:mb-6" />
+            <p className="text-base sm:text-lg text-gray-600 leading-relaxed px-0">
               {homeContent.aboutText}
             </p>
           </div>
@@ -361,14 +404,14 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section ref={featuresRef} className="py-20 bg-gray-50">
+      <section ref={featuresRef} className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="section-container">
           <div
             ref={featureCardsRef}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8"
           >
-            <div className="text-center p-6">
-              <div className="feature-icon-wrap w-16 h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="text-center p-4 sm:p-6">
+              <div className="feature-icon-wrap w-14 h-14 sm:w-16 sm:h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-sm">
                 <svg
                   className="w-8 h-8 text-primary-500"
                   fill="none"
@@ -383,16 +426,16 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900">
                 {homeContent.feature1Title}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {homeContent.feature1Text}
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="feature-icon-wrap w-16 h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="text-center p-4 sm:p-6">
+              <div className="feature-icon-wrap w-14 h-14 sm:w-16 sm:h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-sm">
                 <svg
                   className="w-8 h-8 text-primary-500"
                   fill="none"
@@ -407,16 +450,16 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900">
                 {homeContent.feature2Title}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {homeContent.feature2Text}
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="feature-icon-wrap w-16 h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="text-center p-4 sm:p-6 sm:col-span-2 md:col-span-1">
+              <div className="feature-icon-wrap w-14 h-14 sm:w-16 sm:h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-sm">
                 <svg
                   className="w-8 h-8 text-primary-500"
                   fill="none"
@@ -431,10 +474,10 @@ export default function Home() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900">
                 {homeContent.feature3Title}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {homeContent.feature3Text}
               </p>
             </div>
@@ -443,30 +486,30 @@ export default function Home() {
       </section>
 
       {/* Menu Items Section */}
-      <section ref={menuSectionRef} className="py-20 bg-white">
+      <section ref={menuSectionRef} className="py-12 sm:py-16 md:py-20 bg-white">
         <div className="section-container">
-          <div ref={menuHeadingRef} className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">{homeContent.menuSectionTitle}</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <div ref={menuHeadingRef} className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{homeContent.menuSectionTitle}</h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-1">
               {homeContent.menuSectionSubtitle}
             </p>
           </div>
-          <div ref={menuCardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div ref={menuCardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {featuredMenuItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors duration-200"
+                className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 min-w-0"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-semibold text-gray-900">{item.name}</h3>
-                  <span className="text-primary-500 font-bold text-lg">{formatPrice(item.price, currencySymbol)}</span>
+                <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate min-w-0">{item.name}</h3>
+                  <span className="text-primary-500 font-bold text-base sm:text-lg flex-shrink-0">{formatPrice(item.price, currencySymbol)}</span>
                 </div>
-                <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{item.description}</p>
                 <span className="text-xs text-gray-500 uppercase tracking-wider">{item.category}</span>
               </div>
             ))}
           </div>
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-10">
             <Link href="/menu" className="btn-secondary inline-block">
               View Full Menu
             </Link>
@@ -475,19 +518,19 @@ export default function Home() {
       </section>
 
       {/* Contact Form Section */}
-      <section ref={contactSectionRef} className="py-20 bg-gray-50">
+      <section ref={contactSectionRef} className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="section-container">
-          <div className="max-w-2xl mx-auto">
-            <div ref={contactHeadingRef} className="text-center mb-10">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-              <p className="text-lg text-gray-600">
+          <div className="max-w-2xl mx-auto w-full">
+            <div ref={contactHeadingRef} className="text-center mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Get in Touch</h2>
+              <p className="text-base sm:text-lg text-gray-600">
                 Have a question or feedback? Send us a message and we&apos;ll get back to you.
               </p>
             </div>
             <form
               ref={contactFormRef}
               onSubmit={onContactSubmit}
-              className="bg-white border border-gray-200 rounded-lg p-8 space-y-6 shadow-sm"
+              className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-sm"
             >
               <div>
                 <label htmlFor="home-name" className="block text-sm font-medium text-gray-700 mb-2">Name</label>
@@ -537,7 +580,7 @@ export default function Home() {
                 Send Message
               </button>
             </form>
-            <p className="text-center text-gray-600 mt-6">
+            <p className="text-center text-gray-600 mt-4 sm:mt-6 text-sm sm:text-base">
               Prefer more options? <Link href="/contact" className="text-primary-500 hover:text-primary-600">Visit our full Contact page</Link>.
             </p>
           </div>

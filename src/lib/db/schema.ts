@@ -65,11 +65,17 @@ export const siteBranding = pgTable('site_branding', {
   logoBase64: text('logo_base64').notNull().default(''),
 })
 
-// Site settings (currency, etc.) – editable in Admin > Settings
+// Site settings (currency, social links, site name, etc.) – editable in Admin > Settings
 export const siteSettings = pgTable('site_settings', {
   id: integer('id').primaryKey().default(1),
+  siteName: varchar('site_name', { length: 128 }).notNull().default('Veloria Restaurant'),
   currencySymbol: varchar('currency_symbol', { length: 16 }).notNull().default('$'),
   currencyCode: varchar('currency_code', { length: 8 }).notNull().default('USD'),
+  facebookUrl: varchar('facebook_url', { length: 512 }).notNull().default(''),
+  whatsappUrl: varchar('whatsapp_url', { length: 512 }).notNull().default(''),
+  instagramUrl: varchar('instagram_url', { length: 512 }).notNull().default(''),
+  googleBusinessUrl: varchar('google_business_url', { length: 512 }).notNull().default(''),
+  tripadvisorUrl: varchar('tripadvisor_url', { length: 512 }).notNull().default(''),
 })
 
 export const reservations = pgTable('reservations', {

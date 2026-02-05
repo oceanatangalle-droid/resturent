@@ -1,17 +1,28 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { getSettings } from '@/lib/store'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Veloria Restaurant - Fine Dining Experience',
-  description: 'Experience exceptional cuisine in an elegant atmosphere',
-  icons: {
-    icon: '/api/site/favicon',
-  },
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings()
+  const siteName = settings?.siteName ?? 'Veloria Restaurant'
+  return {
+    title: `${siteName} - Fine Dining Experience`,
+    description: 'Experience exceptional cuisine in an elegant atmosphere',
+    icons: {
+      icon: '/api/site/favicon',
+    },
+  }
 }
 
 export default function RootLayout({

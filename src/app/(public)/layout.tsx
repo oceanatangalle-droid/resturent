@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 export default function PublicLayout({
   children,
@@ -13,6 +14,7 @@ export default function PublicLayout({
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />
+        <WhatsAppButton />
       </Suspense>
     </div>
   )

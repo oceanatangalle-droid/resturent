@@ -58,6 +58,7 @@ export default function Menu() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [priceRange, setPriceRange] = useState<string>('all')
+  const [showScrollTop, setShowScrollTop] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const categoryRefs = useRef<(HTMLDivElement | null)[]>([])
 
@@ -110,6 +111,13 @@ export default function Menu() {
   }, [categories, filteredItems, selectedCategory])
 
   useEffect(() => {
+    const onScroll = () => setShowScrollTop(typeof window !== 'undefined' && window.scrollY > 300)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
     registerGSAP()
     const ctx = gsap.context(() => {
       categoryRefs.current.forEach((el, i) => {
@@ -153,11 +161,11 @@ export default function Menu() {
           subtitle="Discover our carefully crafted selection of dishes"
         />
 
-        <section ref={sectionRef} className="py-16 bg-gray-50">
-        <div className="section-container">
+        <section ref={sectionRef} className="py-10 sm:py-12 md:py-16 bg-gray-50">
+        <div className="section-container w-full">
           {/* Search and filters */}
-          <div className="mb-12 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mb-8 sm:mb-12 p-4 sm:p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="menu-search" className="block text-sm font-medium text-gray-700 mb-1">
                   Search
@@ -215,7 +223,7 @@ export default function Menu() {
                   setSelectedCategory('all')
                   setPriceRange('all')
                 }}
-                className="mt-4 px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                className="mt-4 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-h-[44px] sm:min-h-0"
               >
                 Clear filters
               </button>
@@ -223,7 +231,7 @@ export default function Menu() {
           </div>
 
           {filteredItems.length === 0 ? (
-            <p className="text-center text-gray-500 py-12">
+            <p className="text-center text-gray-500 py-8 sm:py-12 text-sm sm:text-base">
               No dishes match your search or filters. Try adjusting them.
             </p>
           ) : (
@@ -234,20 +242,20 @@ export default function Menu() {
                 <div
                   key={category}
                   ref={(el) => { categoryRefs.current[index] = el }}
-                  className="mb-16"
+                  className="mb-10 sm:mb-16"
                 >
-                  <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 border-b-2 border-primary-600 pb-4">
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-900 border-b-2 border-primary-600 pb-3 sm:pb-4 px-2">
                     {category}
                   </h2>
-                  <div className="menu-cards grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="menu-cards grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
                     {items.map((item) => (
                       <div
                         key={item.id}
-                        className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors duration-200 shadow-sm"
+                        className="bg-white opacity-100 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 shadow-sm min-w-0"
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-semibold text-gray-900">{item.name}</h3>
-                          <span className="text-primary-500 font-bold text-lg">{formatPrice(item.price, settings?.currencySymbol ?? '$')}</span>
+                        <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
+                          <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 break-words">{item.name}</h3>
+                          <span className="text-primary-500 font-bold text-base sm:text-lg flex-shrink-0">{formatPrice(item.price, settings?.currencySymbol ?? '$')}</span>
                         </div>
                         {item.description && (
                           <p className="text-gray-600">{item.description}</p>
@@ -263,20 +271,36 @@ export default function Menu() {
       </section>
       </div>
 
-      {/* Fixed logo watermark: on top of content, centered in viewport, 30% opacity, stays when scrolling; pointer-events-none so menu stays clickable */}
+      {/* Site logo watermark: behind content (under menu cards), centered in viewport, 30% opacity; pointer-events-none so menu stays clickable */}
       <div
         aria-hidden
-        className="fixed inset-0 flex items-center justify-center pointer-events-none z-20"
+        className="fixed inset-0 flex items-center justify-center pointer-events-none z-0"
       >
         <img
           src="/api/site/logo"
           alt=""
-          className="max-w-[min(320px,40vw)] w-auto max-h-[50vh] object-contain opacity-30"
+          className="max-w-[min(240px,85vw)] sm:max-w-[min(280px,40vw)] md:max-w-[min(320px,40vw)] w-auto max-h-[40vh] sm:max-h-[50vh] object-contain opacity-30"
           onLoad={() => setLogoVisible(true)}
           onError={() => setLogoVisible(false)}
           style={{ display: logoVisible ? undefined : 'none' }}
         />
       </div>
+
+      {/* Scroll to top: bottom center, visible when scrolled down */}
+      {showScrollTop && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 flex justify-center">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="btn-primary w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            aria-label="Scroll to top"
+          >
+            <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

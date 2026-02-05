@@ -4,8 +4,14 @@ import { useState, useEffect } from 'react'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 
 interface SiteSettings {
+  siteName: string
   currencySymbol: string
   currencyCode: string
+  facebookUrl: string
+  whatsappUrl: string
+  instagramUrl: string
+  googleBusinessUrl: string
+  tripadvisorUrl: string
 }
 
 const CURRENCY_OPTIONS: { code: string; symbol: string; label: string }[] = [
@@ -34,7 +40,16 @@ export default function AdminSettings() {
   useEffect(() => {
     fetch('/api/settings')
       .then((res) => res.json())
-      .then(setData)
+      .then((d) => setData({
+        siteName: d?.siteName ?? 'Veloria Restaurant',
+        currencySymbol: d?.currencySymbol ?? '$',
+        currencyCode: d?.currencyCode ?? 'USD',
+        facebookUrl: d?.facebookUrl ?? '',
+        whatsappUrl: d?.whatsappUrl ?? '',
+        instagramUrl: d?.instagramUrl ?? '',
+        googleBusinessUrl: d?.googleBusinessUrl ?? '',
+        tripadvisorUrl: d?.tripadvisorUrl ?? '',
+      }))
       .catch(() => setData(null))
       .finally(() => setLoading(false))
   }, [])
@@ -88,7 +103,7 @@ export default function AdminSettings() {
     <div>
       <AdminPageHeader
         title="Settings"
-        subtitle="Change currency and other site options. Prices on the menu and home page will use the selected currency."
+        subtitle="Change site name, currency, and other site options. The site name appears in the header, footer, page titles, and emails."
       />
       <div className="max-w-xl">
         <form onSubmit={handleSubmit} className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 space-y-6">
@@ -99,9 +114,24 @@ export default function AdminSettings() {
           )}
           {saved && (
             <div className="px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
-              Settings saved. Prices on the website will now show in the selected currency.
+              Settings saved. The site name, currency, and links will update across the site.
             </div>
           )}
+
+          <section>
+            <h2 className="text-base font-semibold text-white mb-4">Site name</h2>
+            <p className="text-sm text-zinc-400 mb-3">
+              The name of your restaurant. This appears in the header, footer, page titles, and reservation emails.
+            </p>
+            <label className="block text-sm font-medium text-zinc-300 mb-1.5">Site name</label>
+            <input
+              type="text"
+              value={data.siteName}
+              onChange={(e) => setData({ ...data, siteName: e.target.value })}
+              placeholder="Veloria Restaurant"
+              className={inputClass}
+            />
+          </section>
 
           <section>
             <h2 className="text-base font-semibold text-white mb-4">Currency</h2>
@@ -126,6 +156,65 @@ export default function AdminSettings() {
             <p className="text-xs text-zinc-500 mt-2">
               Preview: {data.currencySymbol}14 (single price), {data.currencySymbol}12–16 (range)
             </p>
+          </section>
+
+          <section>
+            <h2 className="text-base font-semibold text-white mb-4">Social media links</h2>
+            <p className="text-sm text-zinc-400 mb-3">
+              URLs for your social profiles. These appear as icons in the footer (center). Leave blank to hide.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Facebook</label>
+                <input
+                  type="url"
+                  value={data.facebookUrl}
+                  onChange={(e) => setData({ ...data, facebookUrl: e.target.value })}
+                  placeholder="https://facebook.com/yourpage"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">WhatsApp Business</label>
+                <input
+                  type="url"
+                  value={data.whatsappUrl}
+                  onChange={(e) => setData({ ...data, whatsappUrl: e.target.value })}
+                  placeholder="https://wa.me/1234567890"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Instagram</label>
+                <input
+                  type="url"
+                  value={data.instagramUrl}
+                  onChange={(e) => setData({ ...data, instagramUrl: e.target.value })}
+                  placeholder="https://instagram.com/yourprofile"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Google Business</label>
+                <input
+                  type="url"
+                  value={data.googleBusinessUrl}
+                  onChange={(e) => setData({ ...data, googleBusinessUrl: e.target.value })}
+                  placeholder="https://g.page/yourbusiness or Google Maps link"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">TripAdvisor</label>
+                <input
+                  type="url"
+                  value={data.tripadvisorUrl}
+                  onChange={(e) => setData({ ...data, tripadvisorUrl: e.target.value })}
+                  placeholder="https://tripadvisor.com/..."
+                  className={inputClass}
+                />
+              </div>
+            </div>
           </section>
 
           <div className="pt-2">

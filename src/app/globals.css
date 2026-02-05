@@ -11,6 +11,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -20,6 +22,8 @@ body {
   background-color: #fff;
   color: #111827;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 @layer base {
@@ -30,22 +34,48 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-500 transition-colors duration-200;
+    @apply bg-primary-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-primary-500 transition-colors duration-200 min-h-[44px] sm:min-h-0 inline-flex items-center justify-center;
   }
   .btn-primary:not(:disabled):hover {
     color: #fff;
   }
   
   .btn-secondary {
-    @apply bg-transparent text-gray-900 px-6 py-3 rounded-lg font-semibold border-2 border-gray-800 hover:bg-gray-800 hover:text-white transition-colors duration-200;
+    @apply bg-transparent text-gray-900 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold border-2 border-gray-800 hover:bg-gray-800 hover:text-white transition-colors duration-200 min-h-[44px] sm:min-h-0 inline-flex items-center justify-center;
   }
   
   .section-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full box-border;
   }
   
   input::placeholder,
   textarea::placeholder {
     @apply text-gray-500;
+  }
+}
+
+/* WhatsApp floating button wave animation */
+.whatsapp-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #25d366;
+  opacity: 0;
+  animation: whatsapp-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.whatsapp-wave-2 {
+  animation-delay: 0.4s;
+}
+.whatsapp-wave-3 {
+  animation-delay: 0.8s;
+}
+@keyframes whatsapp-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
   }
 }

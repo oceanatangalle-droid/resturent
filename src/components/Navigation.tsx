@@ -8,6 +8,7 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoError, setLogoError] = useState(false)
+  const [siteName, setSiteName] = useState<string>('Veloria')
   const [mounted, setMounted] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
@@ -31,6 +32,13 @@ export default function Navigation() {
       })
       .catch(() => setLogoError(true))
   }, [mounted])
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.siteName && setSiteName(d.siteName))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     registerGSAP()
@@ -60,19 +68,19 @@ export default function Navigation() {
   const showImgLogo = mounted && logoUrl && !logoError
 
   return (
-    <nav ref={navRef} className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="section-container">
-        <div ref={innerRef} className="flex items-center justify-between h-16 py-0">
-          <Link ref={logoRef} href="/" className="flex items-center gap-2 shrink-0">
+    <nav ref={navRef} className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm w-full">
+      <div className="section-container w-full">
+        <div ref={innerRef} className="flex items-center justify-between h-14 sm:h-16 py-0 min-h-[56px]">
+          <Link ref={logoRef} href="/" className="flex items-center gap-2 shrink-0 min-h-[44px] min-w-[44px] justify-start md:min-w-0 md:min-h-0">
             {showImgLogo ? (
-              <img src={logoUrl!} alt="Veloria" className="h-10 w-auto max-w-[180px] object-contain object-left" />
+              <img src={logoUrl!} alt={siteName} className="h-8 sm:h-9 md:h-10 w-auto max-w-[140px] sm:max-w-[160px] md:max-w-[180px] object-contain object-left" />
             ) : (
-              <span className="text-2xl font-bold text-gray-900">Veloria</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">{siteName}</span>
             )}
           </Link>
 
           {/* Desktop Navigation */}
-          <div ref={linksRef} className="hidden md:flex items-center space-x-8">
+          <div ref={linksRef} className="hidden md:flex items-center gap-6 lg:gap-8">
             <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
               Home
             </Link>
@@ -89,12 +97,13 @@ export default function Navigation() {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-gray-600 p-2"
+            className="md:hidden text-gray-600 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-1"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
             <svg
-              className="w-6 h-6"
+              className="w-6 h-6 flex-shrink-0"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -113,31 +122,31 @@ export default function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden pb-4 space-y-2 border-t border-gray-100">
+          <div className="md:hidden pb-4 pt-2 space-y-0 border-t border-gray-100">
             <Link
               href="/"
-              className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Home
             </Link>
             <Link
               href="/menu"
-              className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Menu
             </Link>
             <Link
               href="/contact"
-              className="block py-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Contact
             </Link>
             <Link
               href="/book-a-table"
-              className="block py-2 btn-primary text-center"
+              className="block py-3 px-1 btn-primary text-center min-h-[44px] flex items-center justify-center"
               onClick={() => setIsOpen(false)}
             >
               Book a Table

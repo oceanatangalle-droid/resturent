@@ -103,12 +103,12 @@ export default function BookATable() {
         subtitle="Reserve your table for an unforgettable dining experience"
       />
 
-      <section className="py-16 bg-gray-50" aria-labelledby="book-heading">
-        <div className="section-container max-w-2xl">
-          <div ref={formCardRef} className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+      <section className="py-10 sm:py-12 md:py-16 bg-gray-50" aria-labelledby="book-heading">
+        <div className="section-container max-w-2xl w-full">
+          <div ref={formCardRef} className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-6 md:p-8">
             <h2 id="book-heading" className="sr-only">Reservation form</h2>
-            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6" noValidate>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label htmlFor="book-name" className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name *
@@ -161,7 +161,7 @@ export default function BookATable() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label htmlFor="book-date" className="block text-sm font-medium text-gray-700 mb-2">
                     Date *
@@ -259,8 +259,8 @@ export default function BookATable() {
               </button>
             </form>
 
-            <div ref={policyRef} className="mt-8 pt-8 border-t border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-4">Reservation Policy</h3>
+            <div ref={policyRef} className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-base sm:text-lg">Reservation Policy</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>• Reservations are held for 15 minutes past the reserved time</li>
                 <li>• For parties of 8 or more, please call us directly</li>

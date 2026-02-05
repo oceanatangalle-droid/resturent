@@ -56,11 +56,11 @@ export default function AdminMenu() {
       ) : (
         <div className="space-y-8">
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Categories</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-white">Categories</h2>
               <Link
                 href="/admin/menu/categories/new"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-500 text-white transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-500 text-white transition-colors min-h-[44px] sm:min-h-0 w-full sm:w-auto"
               >
                 Add category
               </Link>
@@ -84,11 +84,11 @@ export default function AdminMenu() {
           </section>
 
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Menu items</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-white">Menu items</h2>
               <Link
                 href="/admin/menu/items/new"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-500 text-white transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-500 text-white transition-colors min-h-[44px] sm:min-h-0 w-full sm:w-auto"
               >
                 Add item
               </Link>

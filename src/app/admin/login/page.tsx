@@ -1,10 +1,17 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 function AdminLoginForm() {
+  const [siteName, setSiteName] = useState('Veloria Restaurant')
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.siteName && setSiteName(d.siteName))
+      .catch(() => {})
+  }, [])
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -37,16 +44,16 @@ function AdminLoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="bg-zinc-900/95 border border-zinc-800 rounded-2xl p-8 shadow-xl">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md mx-auto">
+        <div className="bg-zinc-900/95 border border-zinc-800 rounded-2xl p-5 sm:p-6 md:p-8 shadow-xl">
           <div className="flex justify-center mb-6">
             <span className="w-12 h-12 rounded-xl bg-primary-600 flex items-center justify-center text-white text-xl font-bold">
               V
             </span>
           </div>
           <h1 className="text-xl font-semibold text-white text-center mb-1">Admin Login</h1>
-          <p className="text-zinc-400 text-sm text-center mb-6">Veloria Restaurant</p>
+          <p className="text-zinc-400 text-sm text-center mb-6">{siteName}</p>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
@@ -91,8 +98,8 @@ export default function AdminLogin() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-          <div className="w-full max-w-md text-center text-zinc-400">Loading...</div>
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 sm:p-6">
+          <div className="w-full max-w-md text-center text-zinc-400 text-sm sm:text-base">Loading...</div>
         </div>
       }
     >
