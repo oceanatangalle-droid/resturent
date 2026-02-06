@@ -28,7 +28,7 @@ export default function NewMenuItem() {
       .then((res) => res.json())
       .then((list: Category[]) => {
         setCategories(list)
-        if (list.length && !category) setCategory(list[0].name)
+        if (list.length) setCategory((prev) => (prev ? prev : list[0].name))
       })
   }, [])
 

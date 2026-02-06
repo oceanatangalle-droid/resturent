@@ -38,6 +38,7 @@ export function useInView(
     }, options)
     observer.observe(el)
     return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- options object is derived from defaults + opts; we use primitive deps to avoid re-running when opts reference changes
   }, [options.root, options.rootMargin, options.threshold, handleVisible])
 
   return [ref, inView]
@@ -64,6 +65,7 @@ export function useLoadMore(
     }, options)
     observer.observe(el)
     return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- options object is derived; we use primitive deps to avoid re-running when opts reference changes
   }, [enabled, loadMore, options.root, options.rootMargin, options.threshold])
 
   return ref
