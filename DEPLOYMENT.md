@@ -42,8 +42,8 @@ From your project root, with `DATABASE_URL` set to the Supabase pooler URL above
 Run the initial migration, then all incremental ones:
 
 ```bash
-# 1. Set your Supabase connection string (Transaction pooler)
-export DATABASE_URL="postgresql://postgres.xxx:YOUR_PASSWORD@aws-0-xx.pooler.supabase.com:6543/postgres?pgbouncer=true"
+# 1. Set your Supabase connection string (Session pooler 5432 or Transaction 6543)
+export DATABASE_URL="postgresql://postgres.xxx:YOUR_PASSWORD@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require"
 
 # 2. Initial schema (creates tables and seed data)
 npm run db:migrate:run
@@ -71,18 +71,19 @@ Use **Option A** if you want to match the repo’s migration history and seed da
 3. Click **Add New** → **Project** and import your repository.
 4. Leave **Framework Preset** as **Next.js** and **Root Directory** as `.`.
 5. Before deploying, add environment variables:
-   - **Settings** → **Environment Variables**
-   - Add:
+   - Go to **Settings** → **Environment Variables**.
+   - Add these (copy names from `.env.example`; use your real values – **never commit** `.env`):
 
-     | Name              | Value                    | Notes                    |
-     |-------------------|--------------------------|--------------------------|
-     | `DATABASE_URL`    | Your Supabase pooler URI | **Required** for DB      |
-     | `ADMIN_PASSWORD`  | Strong password          | Optional; default `admin`|
-     | `GOOGLE_CLIENT_ID`| (if using Gmail)         | Optional; reservation emails |
-     | `GOOGLE_CLIENT_SECRET` | (if using Gmail)   | Optional                 |
-     | `GOOGLE_REFRESH_TOKEN`  | (if using Gmail)   | Optional                 |
+     | Name                 | Value                     | Notes                         |
+     |----------------------|---------------------------|-------------------------------|
+     | `DATABASE_URL`       | Your Supabase pooler URI  | **Required** for DB           |
+     | `JWT_SECRET`         | Random secret string      | **Required** for admin login  |
+     | `ADMIN_PASSWORD`     | Strong password           | Optional; default is `admin`  |
+     | `GOOGLE_CLIENT_ID`   | (if using Gmail)          | Optional; reservation emails  |
+     | `GOOGLE_CLIENT_SECRET` | (if using Gmail)       | Optional                      |
+     | `GOOGLE_REFRESH_TOKEN`  | (if using Gmail)      | Optional                      |
 
-   Use the **same** Supabase **Transaction pooler** URL (port 6543) as in step 2.
+   Use the **same** Supabase pooler URL (Session 5432 or Transaction 6543) as in step 2.
 
 6. Click **Deploy**. Vercel will run `next build` and deploy.
 
@@ -114,7 +115,7 @@ If these are not set, the app still works; it just won’t send emails for reser
   Add `DATABASE_URL` in Vercel (Project → Settings → Environment Variables) and redeploy.
 
 - **Connection timeouts or too many connections**  
-  Use the **Transaction** pooler URL (port **6543**) and `?pgbouncer=true`, not the direct connection (port 5432).
+  Prefer the **Transaction** pooler (port **6543**) with `?pgbouncer=true`. Session pooler (port 5432) works but can use more connections under load.
 
 - **SSL errors**  
   Append `&sslmode=require` to `DATABASE_URL` (or the value recommended in Supabase’s connection string section).
