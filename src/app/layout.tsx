@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { getSettings } from '@/lib/store'
@@ -51,6 +53,8 @@ export default function RootLayout({
             {children}
           </Suspense>
         </ErrorBoundary>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
