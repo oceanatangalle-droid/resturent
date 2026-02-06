@@ -2,6 +2,14 @@
 
 This guide walks you through hosting the app on **Vercel** and the database on **Supabase**.
 
+### Quick checklist
+
+- [ ] **Supabase**: Create project at [supabase.com](https://supabase.com) → get **Transaction** pooler URI (port 6543)
+- [ ] **.env**: Set `DATABASE_URL` to that URI (and optionally `ADMIN_PASSWORD`)
+- [x] **Migrations**: Run `npm run db:migrate:run` then `npm run db:migrate:incremental` (already done if you have a fresh DB)
+- [ ] **GitHub**: Push this repo to GitHub
+- [ ] **Vercel**: [vercel.com](https://vercel.com) → Add New → Project → import repo → add `DATABASE_URL` (and `ADMIN_PASSWORD`) in Settings → Environment Variables → Deploy
+
 ---
 
 ## 1. Create a Supabase project

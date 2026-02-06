@@ -26,7 +26,11 @@ if (files.length === 0) {
   process.exit(0)
 }
 
-const pool = new Pool({ connectionString })
+const isSupabase = connectionString.includes('supabase.com')
+const pool = new Pool({
+  connectionString,
+  ...(isSupabase && { ssl: { rejectUnauthorized: false } }),
+})
 
 async function run() {
   for (const file of files) {

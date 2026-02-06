@@ -15,10 +15,14 @@ if (!connectionString) {
   process.exit(1)
 }
 
+const isSupabase = connectionString.includes('supabase.com')
+const pool = new Pool({
+  connectionString,
+  ...(isSupabase && { ssl: { rejectUnauthorized: false } }),
+})
+
 const sqlPath = path.join(__dirname, '..', 'drizzle', '0000_initial.sql')
 const sql = fs.readFileSync(sqlPath, 'utf8')
-
-const pool = new Pool({ connectionString })
 
 pool.query(sql)
   .then(() => {
