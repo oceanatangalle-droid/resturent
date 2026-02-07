@@ -12,7 +12,6 @@ interface ContactInfo {
   addressLine2: string
   phone: string
   email: string
-  hours: string
 }
 
 const defaultContact: ContactInfo = {
@@ -20,30 +19,28 @@ const defaultContact: ContactInfo = {
   addressLine2: 'City, State 12345',
   phone: '(555) 123-4567',
   email: 'info@veloria.com',
-  hours: '',
 }
 
 function Footer() {
   const settings = useSettings()
-  const [contact, setContact] = useState<ContactInfo>(defaultContact)
   const footerRef = useRef<HTMLElement>(null)
   const columnsRef = useRef<HTMLDivElement>(null)
   const socialRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
+  const [contact, setContact] = useState<ContactInfo>(defaultContact)
 
   useEffect(() => {
     fetch('/api/contact')
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => r.ok ? r.json() : null)
       .then((data) => {
-        if (data) {
+        if (data && (data.address ?? data.phone ?? data.email)) {
           setContact({
             address: data.address ?? defaultContact.address,
             addressLine2: data.addressLine2 ?? defaultContact.addressLine2,
             phone: data.phone ?? defaultContact.phone,
             email: data.email ?? defaultContact.email,
-            hours: data.hours ?? defaultContact.hours,
           })
         }
       })
@@ -151,9 +148,8 @@ function Footer() {
             <ul className="space-y-1.5 sm:space-y-2 text-gray-600 text-sm sm:text-base">
               {contact.address && <li>{contact.address}</li>}
               {contact.addressLine2 && <li>{contact.addressLine2}</li>}
-              {contact.phone && <li><a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="hover:text-gray-900 transition-colors">{contact.phone}</a></li>}
-              {contact.email && <li><a href={`mailto:${contact.email}`} className="hover:text-gray-900 transition-colors break-all">{contact.email}</a></li>}
-              {contact.hours && <li className="whitespace-pre-line pt-1">{contact.hours}</li>}
+              {contact.phone && <li>Phone: {contact.phone}</li>}
+              {contact.email && <li>Email: {contact.email}</li>}
             </ul>
           </div>
 
