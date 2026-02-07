@@ -7,14 +7,48 @@ import { useSettings } from '@/contexts/SettingsContext'
 
 const socialIconClass = 'w-6 h-6 text-gray-500 hover:text-primary-600 transition-colors'
 
+interface ContactInfo {
+  address: string
+  addressLine2: string
+  phone: string
+  email: string
+  hours: string
+}
+
+const defaultContact: ContactInfo = {
+  address: '123 Restaurant Street',
+  addressLine2: 'City, State 12345',
+  phone: '(555) 123-4567',
+  email: 'info@veloria.com',
+  hours: '',
+}
+
 function Footer() {
   const settings = useSettings()
+  const [contact, setContact] = useState<ContactInfo>(defaultContact)
   const footerRef = useRef<HTMLElement>(null)
   const columnsRef = useRef<HTMLDivElement>(null)
   const socialRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/contact')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) {
+          setContact({
+            address: data.address ?? defaultContact.address,
+            addressLine2: data.addressLine2 ?? defaultContact.addressLine2,
+            phone: data.phone ?? defaultContact.phone,
+            email: data.email ?? defaultContact.email,
+            hours: data.hours ?? defaultContact.hours,
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -115,10 +149,11 @@ function Footer() {
           <div className="min-w-0">
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900">Contact Info</h4>
             <ul className="space-y-1.5 sm:space-y-2 text-gray-600 text-sm sm:text-base">
-              <li>123 Restaurant Street</li>
-              <li>City, State 12345</li>
-              <li>Phone: (555) 123-4567</li>
-              <li>Email: info@veloria.com</li>
+              {contact.address && <li>{contact.address}</li>}
+              {contact.addressLine2 && <li>{contact.addressLine2}</li>}
+              {contact.phone && <li><a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="hover:text-gray-900 transition-colors">{contact.phone}</a></li>}
+              {contact.email && <li><a href={`mailto:${contact.email}`} className="hover:text-gray-900 transition-colors break-all">{contact.email}</a></li>}
+              {contact.hours && <li className="whitespace-pre-line pt-1">{contact.hours}</li>}
             </ul>
           </div>
 
