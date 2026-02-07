@@ -39,6 +39,8 @@ export interface ContactInfo {
 export interface HomeContent {
   heroWords: string[]
   subtitle: string
+  heroBackgroundImageBase64?: string
+  heroRightImageBase64?: string
   aboutTitle: string
   aboutText: string
   feature1Title: string
@@ -132,6 +134,8 @@ const defaultContact: ContactInfo = {
 const defaultHome: HomeContent = {
   heroWords: ['Welcome', 'to', 'Veloria'],
   subtitle: 'Experience exceptional cuisine in an elegant atmosphere. Where every meal is a celebration.',
+  heroBackgroundImageBase64: '',
+  heroRightImageBase64: '',
   aboutTitle: 'About Veloria',
   aboutText: 'At Veloria, we believe that dining is an experience that should engage all your senses. Our chefs craft each dish with passion, using only the finest ingredients sourced from local farms and trusted suppliers. Every plate tells a story, and every meal creates a memory.',
   feature1Title: 'Fine Dining',
@@ -299,6 +303,8 @@ export async function getHome(): Promise<HomeContent> {
       return {
         heroWords: Array.isArray(row.heroWords) ? row.heroWords : ['Welcome', 'to', 'Veloria'],
         subtitle: row.subtitle,
+        heroBackgroundImageBase64: (row as { heroBackgroundImageBase64?: string }).heroBackgroundImageBase64 ?? '',
+        heroRightImageBase64: (row as { heroRightImageBase64?: string }).heroRightImageBase64 ?? '',
         aboutTitle: row.aboutTitle,
         aboutText: row.aboutText,
         feature1Title: row.feature1Title,
@@ -328,6 +334,8 @@ export async function updateHome(data: Partial<HomeContent>): Promise<HomeConten
     if (Array.isArray(data.heroWords)) payload.heroWords = data.heroWords
     if (typeof data.discountVisible === 'boolean') payload.discountVisible = data.discountVisible ? 1 : 0
     if (typeof (data as { discountImageBase64?: string }).discountImageBase64 === 'string') payload.discountImageBase64 = (data as { discountImageBase64: string }).discountImageBase64
+    if (typeof (data as { heroBackgroundImageBase64?: string }).heroBackgroundImageBase64 === 'string') payload.heroBackgroundImageBase64 = (data as { heroBackgroundImageBase64: string }).heroBackgroundImageBase64
+    if (typeof (data as { heroRightImageBase64?: string }).heroRightImageBase64 === 'string') payload.heroRightImageBase64 = (data as { heroRightImageBase64: string }).heroRightImageBase64
     await db.update(homeContent).set(payload).where(eq(homeContent.id, 1))
     return getHome()
   }

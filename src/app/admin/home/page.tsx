@@ -6,6 +6,8 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader'
 interface HomeContent {
   heroWords: string[]
   subtitle: string
+  heroBackgroundImageBase64?: string
+  heroRightImageBase64?: string
   aboutTitle: string
   aboutText: string
   feature1Title: string
@@ -110,6 +112,100 @@ export default function AdminHome() {
           <section className={sectionClass}>
             <h2 className={sectionTitle}>Hero</h2>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Hero background image</label>
+                <p className="text-xs text-zinc-500 mb-2">Full-width background behind the hero. A 30% black overlay is applied for text readability. JPG or PNG, wide aspect recommended.</p>
+                {data.heroBackgroundImageBase64 ? (
+                  <div className="space-y-2">
+                    <div className="relative inline-block rounded-lg overflow-hidden border border-zinc-600 max-w-md max-h-40">
+                      <img src={data.heroBackgroundImageBase64} alt="Hero background" className="max-h-40 w-auto object-cover" />
+                    </div>
+                    <div className="flex gap-2">
+                      <label className="px-3 py-2 rounded-lg bg-zinc-700 text-zinc-200 text-sm font-medium cursor-pointer hover:bg-zinc-600 transition-colors">
+                        Change image
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            const reader = new FileReader()
+                            reader.onload = () => { const r = reader.result; if (typeof r === 'string') update('heroBackgroundImageBase64', r) }
+                            reader.readAsDataURL(file)
+                            e.target.value = ''
+                          }}
+                        />
+                      </label>
+                      <button type="button" onClick={() => update('heroBackgroundImageBase64', '')} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 text-sm font-medium hover:bg-red-500/30 transition-colors">Remove</button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-zinc-600 rounded-lg cursor-pointer bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                    <span className="text-sm text-zinc-400">Upload hero background image</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = () => { const r = reader.result; if (typeof r === 'string') update('heroBackgroundImageBase64', r) }
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Hero right-side image</label>
+                <p className="text-xs text-zinc-500 mb-2">Image shown on the right of the hero on large screens. Optional. Portrait or square works well.</p>
+                {data.heroRightImageBase64 ? (
+                  <div className="space-y-2">
+                    <div className="relative inline-block rounded-lg overflow-hidden border border-zinc-600 max-w-xs max-h-48">
+                      <img src={data.heroRightImageBase64} alt="Hero right" className="max-h-48 w-auto object-cover" />
+                    </div>
+                    <div className="flex gap-2">
+                      <label className="px-3 py-2 rounded-lg bg-zinc-700 text-zinc-200 text-sm font-medium cursor-pointer hover:bg-zinc-600 transition-colors">
+                        Change image
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            const reader = new FileReader()
+                            reader.onload = () => { const r = reader.result; if (typeof r === 'string') update('heroRightImageBase64', r) }
+                            reader.readAsDataURL(file)
+                            e.target.value = ''
+                          }}
+                        />
+                      </label>
+                      <button type="button" onClick={() => update('heroRightImageBase64', '')} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 text-sm font-medium hover:bg-red-500/30 transition-colors">Remove</button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-zinc-600 rounded-lg cursor-pointer bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                    <span className="text-sm text-zinc-400">Upload hero right-side image</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        const reader = new FileReader()
+                        reader.onload = () => { const r = reader.result; if (typeof r === 'string') update('heroRightImageBase64', r) }
+                        reader.readAsDataURL(file)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Hero title words (comma-separated)</label>
                 <input

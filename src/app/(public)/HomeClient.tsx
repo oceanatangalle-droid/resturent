@@ -11,6 +11,8 @@ import { useInView, useLoadMore } from '@/hooks/useInView'
 export interface HomeContent {
   heroWords: string[]
   subtitle: string
+  heroBackgroundImageBase64?: string
+  heroRightImageBase64?: string
   aboutTitle: string
   aboutText: string
   feature1Title: string
@@ -41,6 +43,8 @@ export interface FeaturedItem {
 const defaultHome: HomeContent = {
   heroWords: ['Welcome', 'to', 'Veloria'],
   subtitle: 'Experience exceptional cuisine in an elegant atmosphere. Where every meal is a celebration.',
+  heroBackgroundImageBase64: '',
+  heroRightImageBase64: '',
   aboutTitle: 'About Veloria',
   aboutText: 'At Veloria, we believe that dining is an experience that should engage all your senses. Our chefs craft each dish with passion, using only the finest ingredients sourced from local farms and trusted suppliers. Every plate tells a story, and every meal creates a memory.',
   feature1Title: 'Fine Dining',
@@ -222,31 +226,48 @@ export default function HomeClient({
 
   return (
     <div ref={containerRef} className="min-h-screen bg-white">
-      <section ref={heroRef} className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] flex items-center bg-white text-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" />
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(220,38,38,0.08) 0%, transparent 50%)' }} />
+      <section ref={heroRef} className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] flex items-center text-gray-900 overflow-hidden">
+        {/* Background image (from admin) or fallback gradient */}
+        {homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? (
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${homeContent.heroBackgroundImageBase64})` }} aria-hidden />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-100" aria-hidden />
+        )}
+        {/* 30% black overlay (only when background image is set) */}
+        {homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') && (
+          <div className="absolute inset-0 bg-black/30" aria-hidden />
+        )}
         <div className="section-container relative z-10 w-full py-12 sm:py-16 md:py-24 lg:py-32">
-          <div ref={heroContentRef} className="max-w-3xl w-full">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 tracking-tight flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 text-gray-900">
-              {(homeContent.heroWords.length ? homeContent.heroWords : ['Welcome', 'to', 'Veloria']).map((word, i) => (
-                <span key={`${word}-${i}`} ref={(el) => { if (el) titleWordsRef.current[i] = el }} className="inline-block">{word}</span>
-              ))}
-            </h1>
-            <p ref={subtitleRef} className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 md:mb-10 max-w-2xl">{homeContent.subtitle}</p>
-            <div ref={buttonsRef} className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Link href="/book-a-table" className="btn-primary text-center">Reserve Your Table</Link>
-                <Link href="/menu" className="btn-secondary text-center">View Our Menu</Link>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                <button type="button" onClick={() => document.getElementById('reviews-tripadvisor')?.scrollIntoView({ behavior: 'smooth' })} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00AF87]" style={{ backgroundColor: '#00AF87' }} aria-label="Scroll to TripAdvisor reviews">
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" aria-hidden><path d="M12.006 4.295c-2.67 0-5.338.784-7.645 2.353H0l2.363 2.638a.582.582 0 0 1-.375.958H.192v3.016h1.15a.582.582 0 0 1 .375.957L0 14.875h4.361a8.385 8.385 0 0 0 7.645 5.083 8.385 8.385 0 0 0 7.646-5.083h4.36l-2.362-2.638a.582.582 0 0 1 .375-.957h1.15V8.244h-1.15a.582.582 0 0 1-.375-.958L24 4.295h-4.361a8.385 8.385 0 0 0-7.633-5.083zm-.027 10.652a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626zm7.646-3.313a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626z" /></svg>
-                </button>
-                <button type="button" onClick={() => document.getElementById('reviews-google')?.scrollIntoView({ behavior: 'smooth' })} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400" style={{ backgroundColor: '#fff', border: '2px solid #e8eaed' }} aria-label="Scroll to Google reviews">
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
-                </button>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
+            <div ref={heroContentRef} className="max-w-3xl w-full lg:col-span-7">
+              <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 tracking-tight flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 ${homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
+                {(homeContent.heroWords.length ? homeContent.heroWords : ['Welcome', 'to', 'Veloria']).map((word, i) => (
+                  <span key={`${word}-${i}`} ref={(el) => { if (el) titleWordsRef.current[i] = el }} className="inline-block">{word}</span>
+                ))}
+              </h1>
+              <p ref={subtitleRef} className={`text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 max-w-2xl ${homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? 'text-gray-200 drop-shadow' : 'text-gray-600'}`}>{homeContent.subtitle}</p>
+              <div ref={buttonsRef} className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <Link href="/book-a-table" className="btn-primary text-center">Reserve Your Table</Link>
+                  <Link href="/menu" className={`text-center rounded-lg font-semibold px-6 py-3 transition-colors ${homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? 'btn-secondary border-white/80 text-white hover:bg-white/10' : 'btn-secondary'}`}>View Our Menu</Link>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  <button type="button" onClick={() => document.getElementById('reviews-tripadvisor')?.scrollIntoView({ behavior: 'smooth' })} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00AF87]" style={{ backgroundColor: '#00AF87' }} aria-label="Scroll to TripAdvisor reviews">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="currentColor" aria-hidden><path d="M12.006 4.295c-2.67 0-5.338.784-7.645 2.353H0l2.363 2.638a.582.582 0 0 1-.375.958H.192v3.016h1.15a.582.582 0 0 1 .375.957L0 14.875h4.361a8.385 8.385 0 0 0 7.645 5.083 8.385 8.385 0 0 0 7.646-5.083h4.36l-2.362-2.638a.582.582 0 0 1 .375-.957h1.15V8.244h-1.15a.582.582 0 0 1-.375-.958L24 4.295h-4.361a8.385 8.385 0 0 0-7.633-5.083zm-.027 10.652a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626zm7.646-3.313a3.313 3.313 0 1 1 0-6.626 3.313 3.313 0 0 1 0 6.626z" /></svg>
+                  </button>
+                  <button type="button" onClick={() => document.getElementById('reviews-google')?.scrollIntoView({ behavior: 'smooth' })} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 bg-white/90 border border-white" aria-label="Scroll to Google reviews">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                  </button>
+                </div>
               </div>
             </div>
+            {homeContent.heroRightImageBase64 && homeContent.heroRightImageBase64.startsWith('data:') && (
+              <div className="hidden lg:flex lg:col-span-5 justify-center items-center">
+                <div className="relative w-full max-w-md aspect-[4/5] rounded-xl overflow-hidden shadow-2xl ring-2 ring-white/20">
+                  <img src={homeContent.heroRightImageBase64} alt="" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

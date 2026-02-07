@@ -38,6 +38,8 @@ export const homeContent = pgTable('home_content', {
   id: integer('id').primaryKey().default(1),
   heroWords: jsonb('hero_words').$type<string[]>().notNull().default(['Welcome', 'to', 'Veloria']),
   subtitle: text('subtitle').notNull().default(''),
+  heroBackgroundImageBase64: text('hero_background_image_base64').notNull().default(''),
+  heroRightImageBase64: text('hero_right_image_base64').notNull().default(''),
   aboutTitle: varchar('about_title', { length: 255 }).notNull().default('About Veloria'),
   aboutText: text('about_text').notNull().default(''),
   feature1Title: varchar('feature1_title', { length: 255 }).notNull().default('Fine Dining'),
