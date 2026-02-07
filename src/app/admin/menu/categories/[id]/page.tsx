@@ -31,7 +31,7 @@ export default function EditCategory() {
     setSaving(true)
     try {
       const res = await fetch(`/api/menu/categories/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim() }),
       })

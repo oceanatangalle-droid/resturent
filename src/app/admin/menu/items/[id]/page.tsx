@@ -56,7 +56,7 @@ export default function EditMenuItem() {
     setSaving(true)
     try {
       const res = await fetch(`/api/menu/items/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),

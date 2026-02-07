@@ -76,7 +76,7 @@ export default function AdminBranding() {
     setSaved(false)
     try {
       const res = await fetch('/api/site/branding', {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           faviconBase64: data.faviconBase64,

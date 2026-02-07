@@ -10,6 +10,16 @@ This guide walks you through hosting the app on **Vercel** and the database on *
 - [ ] **GitHub**: Push this repo to GitHub
 - [ ] **Vercel**: [vercel.com](https://vercel.com) → Add New → Project → import repo → add `DATABASE_URL` (and `ADMIN_PASSWORD`) in Settings → Environment Variables → Deploy
 
+### Auto-deploy (in codebase)
+
+This project is set up for Vercel via `vercel.json`. **To get auto-deploy on every push to `main`:**
+
+1. In Vercel: **Add New** → **Project** → import this repository (GitHub/GitLab/Bitbucket).
+2. After the first deploy, go to **Settings** → **Git**.
+3. **Production Branch** should be `main`. Every push to `main` will trigger a new deployment automatically.
+
+You only connect the repo once; no extra config in the repo is needed. The behaviour is controlled by Vercel’s Git integration, not by a file in the repo.
+
 ---
 
 ## 1. Create a Supabase project
