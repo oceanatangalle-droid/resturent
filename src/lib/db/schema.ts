@@ -103,6 +103,20 @@ export const contactSubmissions = pgTable('contact_submissions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// Gallery: images (upload base64 or URL) and videos (YouTube or direct URL)
+export const galleryItems = pgTable('gallery_items', {
+  id: serial('id').primaryKey(),
+  type: varchar('type', { length: 16 }).notNull(), // 'image' | 'video'
+  sortOrder: integer('sort_order').notNull().default(0),
+  caption: text('caption'),
+  // Image: either base64 (upload) or URL (link)
+  imageBase64: text('image_base64'),
+  imageUrl: text('image_url'),
+  // Video: YouTube URL or direct video URL
+  videoYoutubeUrl: text('video_youtube_url'),
+  videoUrl: text('video_url'),
+})
+
 export type SiteBrandingRow = typeof siteBranding.$inferSelect
 export type SiteSettingsRow = typeof siteSettings.$inferSelect
 export type MenuCategoryRow = typeof menuCategories.$inferSelect
@@ -111,3 +125,4 @@ export type ContactInfoRow = typeof contactInfo.$inferSelect
 export type HomeContentRow = typeof homeContent.$inferSelect
 export type ReservationRow = typeof reservations.$inferSelect
 export type ContactSubmissionRow = typeof contactSubmissions.$inferSelect
+export type GalleryItemRow = typeof galleryItems.$inferSelect

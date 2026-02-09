@@ -9,6 +9,7 @@ import {
   siteSettings,
   reservations as reservationsTable,
   contactSubmissions as contactSubmissionsTable,
+  galleryItems as galleryItemsTable,
 } from './db/schema'
 
 export interface MenuCategory {
@@ -99,6 +100,19 @@ export interface ContactSubmission {
   phone: string
   message: string
   createdAt: string
+}
+
+export type GalleryItemType = 'image' | 'video'
+
+export interface GalleryItem {
+  id: string
+  type: GalleryItemType
+  sortOrder: number
+  caption?: string
+  imageBase64?: string
+  imageUrl?: string
+  videoYoutubeUrl?: string
+  videoUrl?: string
 }
 
 // ---- In-memory fallback when DATABASE_URL is not set ----
@@ -570,4 +584,86 @@ export async function addContactSubmission(data: Omit<ContactSubmission, 'id' | 
   }
   memoryContactSubmissions.push({ ...data, id, createdAt })
   return { id, createdAt }
+}
+
+// ---- Gallery ----
+const memoryGalleryItems: GalleryItem[] = []
+let nextGalleryId = 1
+
+function rowToGalleryItem(r: {
+  id: number
+  type: string
+  sortOrder: number
+  caption: string | null
+  imageBase64: string | null
+  imageUrl: string | null
+  videoYoutubeUrl: string | null
+  videoUrl: string | null
+}): GalleryItem {
+  return {
+    id: String(r.id),
+    type: r.type as GalleryItemType,
+    sortOrder: r.sortOrder,
+    caption: r.caption ?? undefined,
+    imageBase64: r.imageBase64 ?? undefined,
+    imageUrl: r.imageUrl ?? undefined,
+    videoYoutubeUrl: r.videoYoutubeUrl ?? undefined,
+    videoUrl: r.videoUrl ?? undefined,
+  }
+}
+
+export async function getGalleryItems(): Promise<GalleryItem[]> {
+  if (db) {
+    const rows = await db.select().from(galleryItemsTable).orderBy(asc(galleryItemsTable.sortOrder))
+    return rows.map(rowToGalleryItem)
+  }
+  return [...memoryGalleryItems].sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
+export async function addGalleryItem(data: Omit<GalleryItem, 'id'>): Promise<GalleryItem> {
+  if (db) {
+    const [row] = await db
+      .insert(galleryItemsTable)
+      .values({
+        type: data.type,
+        sortOrder: data.sortOrder,
+        caption: data.caption ?? null,
+        imageBase64: data.imageBase64 ?? null,
+        imageUrl: data.imageUrl ?? null,
+        videoYoutubeUrl: data.videoYoutubeUrl ?? null,
+        videoUrl: data.videoUrl ?? null,
+      })
+      .returning()
+    if (!row) throw new Error('Insert failed')
+    return rowToGalleryItem(row)
+  }
+  const id = String(nextGalleryId++)
+  const item: GalleryItem = { ...data, id }
+  memoryGalleryItems.push(item)
+  return item
+}
+
+export async function updateGalleryItem(id: string, data: Partial<Omit<GalleryItem, 'id'>>): Promise<GalleryItem | null> {
+  if (db) {
+    const payload: Record<string, unknown> = { ...data }
+    const [row] = await db
+      .update(galleryItemsTable)
+      .set(payload)
+      .where(eq(galleryItemsTable.id, parseInt(id, 10)))
+      .returning()
+    return row ? rowToGalleryItem(row) : null
+  }
+  const i = memoryGalleryItems.findIndex((x) => x.id === id)
+  if (i === -1) return null
+  memoryGalleryItems[i] = { ...memoryGalleryItems[i], ...data }
+  return memoryGalleryItems[i]
+}
+
+export async function deleteGalleryItem(id: string): Promise<void> {
+  if (db) {
+    await db.delete(galleryItemsTable).where(eq(galleryItemsTable.id, parseInt(id, 10)))
+    return
+  }
+  const idx = memoryGalleryItems.findIndex((x) => x.id === id)
+  if (idx !== -1) memoryGalleryItems.splice(idx, 1)
 }

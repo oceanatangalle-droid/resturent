@@ -1,8 +1,8 @@
-import { getHome, getItems } from '@/lib/store'
+import { getHome, getItems, getGalleryItems } from '@/lib/store'
 import HomeClient from './HomeClient'
 
 export default async function HomePage() {
-  const [homeData, items] = await Promise.all([getHome(), getItems()])
+  const [homeData, items, gallery] = await Promise.all([getHome(), getItems(), getGalleryItems()])
   const limit = homeData.featuredMenuLimit ?? 6
   const featured = items.slice(0, limit).map((item) => ({
     id: String(item.id),
@@ -11,5 +11,15 @@ export default async function HomePage() {
     price: item.price,
     category: item.category,
   }))
-  return <HomeClient initialHome={homeData} initialFeatured={featured} />
+  const initialGallery = gallery.map((g) => ({
+    id: g.id,
+    type: g.type,
+    sortOrder: g.sortOrder,
+    caption: g.caption,
+    imageBase64: g.imageBase64,
+    imageUrl: g.imageUrl,
+    videoYoutubeUrl: g.videoYoutubeUrl,
+    videoUrl: g.videoUrl,
+  }))
+  return <HomeClient initialHome={homeData} initialFeatured={featured} initialGallery={initialGallery} />
 }

@@ -40,6 +40,17 @@ export interface FeaturedItem {
   category: string
 }
 
+export interface GalleryItem {
+  id: string
+  type: 'image' | 'video'
+  sortOrder: number
+  caption?: string
+  imageBase64?: string
+  imageUrl?: string
+  videoYoutubeUrl?: string
+  videoUrl?: string
+}
+
 const defaultHome: HomeContent = {
   heroWords: ['Welcome', 'to', 'Veloria'],
   subtitle: 'Experience exceptional cuisine in an elegant atmosphere. Where every meal is a celebration.',
@@ -75,9 +86,11 @@ const defaultFeatured: FeaturedItem[] = [
 export default function HomeClient({
   initialHome,
   initialFeatured,
+  initialGallery = [],
 }: {
   initialHome: HomeContent
   initialFeatured: FeaturedItem[]
+  initialGallery?: GalleryItem[]
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLElement>(null)
@@ -97,10 +110,12 @@ export default function HomeClient({
   const contactHeadingRef = useRef<HTMLDivElement>(null)
   const contactFormRef = useRef<HTMLFormElement>(null)
   const discountRef = useRef<HTMLElement>(null)
+  const galleryRef = useRef<HTMLElement>(null)
   const settings = useSettings()
   const currencySymbol = settings?.currencySymbol ?? '$'
   const [homeContent, setHomeContent] = useState<HomeContent>(() => initialHome ?? defaultHome)
   const [featuredMenuItems, setFeaturedMenuItems] = useState<FeaturedItem[]>(() => initialFeatured ?? defaultFeatured)
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => initialGallery ?? [])
   const [contactFormData, setContactFormData] = useState({ name: '', email: '', phone: '', message: '' })
   const [contactSubmitted, setContactSubmitted] = useState(false)
   const [contactError, setContactError] = useState('')
@@ -121,9 +136,11 @@ export default function HomeClient({
       Promise.all([
         fetch('/api/home').then((r) => r.ok ? r.json() : null),
         fetch('/api/menu/items').then((r) => r.ok ? r.json() : []),
-      ]).then(([homeData, items]: [HomeContent | null, FeaturedItem[]]) => {
+        fetch('/api/gallery').then((r) => r.ok ? r.json() : []),
+      ]).then(([homeData, items, gallery]: [HomeContent | null, FeaturedItem[], GalleryItem[]]) => {
         if (homeData) setHomeContent(homeData)
         if (items?.length) setFeaturedMenuItems((prev) => items.slice(0, (homeData || defaultHome).featuredMenuLimit ?? 6))
+        if (Array.isArray(gallery)) setGalleryItems(gallery)
       }).catch(() => {})
     }
     const id = typeof window.requestIdleCallback !== 'undefined'
@@ -292,6 +309,59 @@ export default function HomeClient({
                 <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">{homeContent.discountSubtitle ?? 'Enjoy 20% off your next dinner when you book online. Limited time only.'}</p>
                 <Link href={homeContent.discountCtaLink ?? '/book-a-table'} className="btn-primary inline-block">{homeContent.discountCtaText ?? 'Book Now'}</Link>
               </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {galleryItems.length > 0 && (
+        <section ref={galleryRef} className="py-12 sm:py-16 md:py-20 bg-white border-y border-gray-200 content-visibility-auto">
+          <div className="section-container">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">Gallery</h2>
+            <p className="text-center text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">Photos and videos from our restaurant.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {galleryItems.map((item) => (
+                <div key={item.id} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm aspect-[4/3] flex flex-col">
+                  {item.type === 'image' ? (
+                    <>
+                      {item.imageBase64 && item.imageBase64.startsWith('data:') ? (
+                        <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
+                      ) : item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
+                      ) : null}
+                    </>
+                  ) : (
+                    <div className="relative w-full h-full min-h-[200px] bg-black">
+                      {item.videoYoutubeUrl ? (() => {
+                        const m = item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+                        const vid = m ? m[1] : null
+                        return vid ? (
+                          <iframe
+                            src={`https://www.youtube.com/embed/${vid}?rel=0`}
+                            title={item.caption ?? 'Video'}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="absolute inset-0 w-full h-full"
+                          />
+                        ) : null
+                      })() : item.videoUrl ? (
+                        <video
+                          src={item.videoUrl}
+                          controls
+                          playsInline
+                          className="w-full h-full object-contain"
+                          poster=""
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      ) : null}
+                    </div>
+                  )}
+                  {item.caption && (
+                    <p className="p-3 text-sm text-gray-600 text-center border-t border-gray-200">{item.caption}</p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </section>
