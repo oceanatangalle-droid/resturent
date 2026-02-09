@@ -143,7 +143,7 @@ export default function AdminGalleryPage() {
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6">
           <h2 className="text-base font-semibold text-white mb-4">Add image</h2>
           <p className="text-xs text-zinc-500 mb-4">
-            Upload a file (saved at full quality in the database) or paste an image URL.
+            Upload a file (saved at full quality in the database) or paste an image URL. On Vercel, large uploads may hit size limits—use &quot;Or image URL&quot; for big images.
           </p>
           <form onSubmit={handleAddImage} className="space-y-4">
             <div>
