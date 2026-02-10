@@ -314,58 +314,69 @@ export default function HomeClient({
         </section>
       )}
 
-      {galleryItems.length > 0 && (
-        <section id="gallery" ref={galleryRef} className="py-12 sm:py-16 md:py-20 bg-white border-y border-gray-200 content-visibility-auto scroll-mt-20">
-          <div className="section-container">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">Gallery</h2>
-            <p className="text-center text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">Photos and videos from our restaurant.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {galleryItems.map((item) => (
-                <div key={item.id} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm aspect-[4/3] flex flex-col">
-                  {item.type === 'image' ? (
-                    <>
-                      {item.imageBase64 && item.imageBase64.startsWith('data:') ? (
-                        <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
-                      ) : item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
-                      ) : null}
-                    </>
-                  ) : (
-                    <div className="relative w-full h-full min-h-[200px] bg-black">
-                      {item.videoYoutubeUrl ? (() => {
-                        const m = item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
-                        const vid = m ? m[1] : null
-                        return vid ? (
-                          <iframe
-                            src={`https://www.youtube.com/embed/${vid}?rel=0`}
-                            title={item.caption ?? 'Video'}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            className="absolute inset-0 w-full h-full"
-                          />
-                        ) : null
-                      })() : item.videoUrl ? (
-                        <video
-                          src={item.videoUrl}
-                          controls
-                          playsInline
-                          className="w-full h-full object-contain"
-                          poster=""
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      ) : null}
+      <section id="gallery" ref={galleryRef} className="py-12 sm:py-16 md:py-20 bg-white border-y border-gray-200 content-visibility-auto scroll-mt-20">
+        <div className="section-container">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">Gallery</h2>
+          <p className="text-center text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">Photos and videos from our restaurant.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {galleryItems.length > 0
+              ? galleryItems.slice(0, 6).map((item) => (
+                  <div key={item.id} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm aspect-[4/3] flex flex-col">
+                    {item.type === 'image' ? (
+                      <>
+                        {item.imageBase64 && item.imageBase64.startsWith('data:') ? (
+                          <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
+                        ) : item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+                            <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="relative w-full h-full min-h-[200px] bg-black">
+                        {item.videoYoutubeUrl ? (() => {
+                          const m = item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+                          const vid = m ? m[1] : null
+                          return vid ? (
+                            <iframe
+                              src={`https://www.youtube.com/embed/${vid}?rel=0`}
+                              title={item.caption ?? 'Video'}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="absolute inset-0 w-full h-full"
+                            />
+                          ) : null
+                        })() : item.videoUrl ? (
+                          <video src={item.videoUrl} controls playsInline className="w-full h-full object-contain">
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : null}
+                      </div>
+                    )}
+                    {item.caption && (
+                      <p className="p-3 text-sm text-gray-600 text-center border-t border-gray-200">{item.caption}</p>
+                    )}
+                  </div>
+                ))
+              : Array.from({ length: 6 }, (_, i) => (
+                  <div key={`placeholder-${i}`} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100 aspect-[4/3] flex flex-col">
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+                      </svg>
                     </div>
-                  )}
-                  {item.caption && (
-                    <p className="p-3 text-sm text-gray-600 text-center border-t border-gray-200">{item.caption}</p>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
           </div>
-        </section>
-      )}
+          <div className="text-center mt-8 sm:mt-10">
+            <Link href="/gallery" className="btn-primary inline-block">
+              View more
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section id="reviews-tripadvisor" className="py-8 sm:py-12 md:py-16 bg-white border-y border-gray-200 overflow-hidden scroll-mt-20 content-visibility-auto">
         <div className="section-container"><div className="elfsight-app-b29f3b82-39f0-432b-a569-e92275647c5b" data-elfsight-app-lazy /></div>
