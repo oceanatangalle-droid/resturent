@@ -315,7 +315,7 @@ export default function HomeClient({
       )}
 
       {galleryItems.length > 0 && (
-        <section ref={galleryRef} className="py-12 sm:py-16 md:py-20 bg-white border-y border-gray-200 content-visibility-auto">
+        <section id="gallery" ref={galleryRef} className="py-12 sm:py-16 md:py-20 bg-white border-y border-gray-200 content-visibility-auto scroll-mt-20">
           <div className="section-container">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">Gallery</h2>
             <p className="text-center text-gray-600 mb-8 sm:mb-10 max-w-2xl mx-auto">Photos and videos from our restaurant.</p>

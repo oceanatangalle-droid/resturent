@@ -87,6 +87,9 @@ function Navigation() {
             <Link href="/menu" className="text-gray-600 hover:text-gray-900 transition-colors">
               Menu
             </Link>
+            <Link href="/#gallery" className="text-gray-600 hover:text-gray-900 transition-colors">
+              Gallery
+            </Link>
             <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
               Contact
             </Link>
@@ -136,6 +139,13 @@ function Navigation() {
               onClick={() => setIsOpen(false)}
             >
               Menu
+            </Link>
+            <Link
+              href="/#gallery"
+              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
+              onClick={() => setIsOpen(false)}
+            >
+              Gallery
             </Link>
             <Link
               href="/contact"
