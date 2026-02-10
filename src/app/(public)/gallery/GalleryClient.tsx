@@ -17,6 +17,12 @@ export interface GalleryItem {
   videoUrl?: string
 }
 
+function getYouTubeId(url: string | undefined): string | null {
+  if (!url || typeof url !== 'string') return null
+  const m = url.trim().match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
 // Album row pattern: 3 items, 2 big, 3 items, 3, 2 big, 3... (like the reference HTML)
 function chunkAlbum(items: GalleryItem[]): GalleryItem[][] {
   const rows: GalleryItem[][] = []
@@ -28,6 +34,53 @@ function chunkAlbum(items: GalleryItem[]): GalleryItem[][] {
     i += size
   }
   return rows
+}
+
+function VideoThumbnail({ item }: { item: GalleryItem }) {
+  const [thumbError, setThumbError] = useState(false)
+  const ytId = getYouTubeId(item.videoYoutubeUrl)
+  const isYoutube = Boolean(ytId)
+
+  const thumbUrl = isYoutube && !thumbError
+    ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+    : null
+
+  return (
+    <div className="relative w-full h-full min-h-[160px] sm:min-h-[180px] flex items-center justify-center overflow-hidden bg-gray-900">
+      {thumbUrl ? (
+        <>
+          <img
+            src={thumbUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+            onError={() => setThumbError(true)}
+          />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/40" aria-hidden>
+            <span className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/60 flex items-center justify-center border-2 border-white/80">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </span>
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
+          <span className="relative flex flex-col items-center justify-center gap-2 text-white/90">
+            <span className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/50">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            <span className="text-xs font-medium">Video</span>
+          </span>
+        </>
+      )}
+    </div>
+  )
 }
 
 function GalleryCard({
@@ -50,7 +103,7 @@ function GalleryCard({
 
   const isImage = item.type === 'image'
   const imgSrc = isImage ? (item.imageBase64 && item.imageBase64.startsWith('data:') ? item.imageBase64 : item.imageUrl) : null
-  const ytId = !isImage && item.videoYoutubeUrl ? item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)?.[1] : null
+  const isVideo = item.type === 'video'
 
   return (
     <button
@@ -60,35 +113,18 @@ function GalleryCard({
         size === 'big' ? 'min-h-[240px] sm:min-h-[280px]' : 'min-h-[180px] sm:min-h-[200px]'
       }`}
     >
-      <div className="w-full h-full min-h-[160px] sm:min-h-[180px] flex items-center justify-center overflow-hidden bg-gray-200">
+      <div className="w-full h-full flex items-center justify-center overflow-hidden bg-gray-200">
         {isImage && imgSrc ? (
           <img
             src={imgSrc}
             alt={item.caption ?? 'Gallery'}
-            className="w-full h-full object-contain"
+            className="w-full h-full min-h-[160px] sm:min-h-[180px] object-contain"
           />
-        ) : !isImage && ytId ? (
-          <div className="relative w-full h-full flex items-center justify-center bg-black">
-            <img
-              src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
-              alt=""
-              className="w-full h-full object-contain"
-            />
-            <span className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full w-16 h-16 mx-auto my-auto">
-              <svg className="w-12 h-12 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </span>
-          </div>
-        ) : !isImage && item.videoUrl ? (
-          <div className="w-full h-full flex items-center justify-center bg-black text-white">
-            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </div>
+        ) : isVideo ? (
+          <VideoThumbnail item={item} />
         ) : (
-          <div className="text-gray-500">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="min-h-[160px] sm:min-h-[180px] w-full flex items-center justify-center text-gray-500">
+            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
             </svg>
           </div>

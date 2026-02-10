@@ -52,6 +52,50 @@ export interface GalleryItem {
   videoUrl?: string
 }
 
+function getYouTubeId(url: string | undefined): string | null {
+  if (!url || typeof url !== 'string') return null
+  const m = url.trim().match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+function HomeGalleryVideoThumbnail({ item }: { item: GalleryItem }) {
+  const [thumbError, setThumbError] = useState(false)
+  const ytId = getYouTubeId(item.videoYoutubeUrl)
+  const thumbUrl = ytId && !thumbError ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null
+  return (
+    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden bg-gray-900">
+      {thumbUrl ? (
+        <>
+          <img
+            src={thumbUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+            onError={() => setThumbError(true)}
+          />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/40" aria-hidden>
+            <span className="w-14 h-14 rounded-full bg-black/60 flex items-center justify-center border-2 border-white/80">
+              <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+          </span>
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
+          <span className="relative flex flex-col items-center justify-center gap-2 text-white/90">
+            <span className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/50">
+              <svg className="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+            <span className="text-xs font-medium">Video</span>
+          </span>
+        </>
+      )}
+    </div>
+  )
+}
+
 const defaultHome: HomeContent = {
   heroWords: ['Welcome', 'to', 'Veloria'],
   subtitle: 'Experience exceptional cuisine in an elegant atmosphere. Where every meal is a celebration.',
@@ -327,101 +371,48 @@ export default function HomeClient({
                 const preview = galleryItems.slice(0, 6)
                 const row1 = preview.slice(0, 3)
                 const row2 = preview.slice(3, 6)
+                const openLightbox = (item: GalleryItem) => {
+                  setGalleryLightboxItem({
+                    type: item.type,
+                    caption: item.caption,
+                    imageBase64: item.imageBase64,
+                    imageUrl: item.imageUrl,
+                    videoYoutubeUrl: item.videoYoutubeUrl,
+                    videoUrl: item.videoUrl,
+                  })
+                  setGalleryLightboxOpen(true)
+                }
+                const Card = ({ item }: { item: GalleryItem }) => (
+                  <div className="img">
+                    <button
+                      type="button"
+                      onClick={() => openLightbox(item)}
+                      className="w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm min-h-[180px] sm:min-h-[200px] flex flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    >
+                      <div className="w-full flex-1 min-h-[160px] flex items-center justify-center bg-gray-200 overflow-hidden">
+                        {item.type === 'image' ? (
+                          item.imageBase64 && item.imageBase64.startsWith('data:') ? (
+                            <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
+                          ) : item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
+                          ) : (
+                            <svg className="w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
+                          )
+                        ) : (
+                          <HomeGalleryVideoThumbnail item={item} />
+                        )}
+                      </div>
+                      {item.caption && <p className="p-2 text-sm text-gray-600 text-center border-t border-gray-200 bg-white">{item.caption}</p>}
+                    </button>
+                  </div>
+                )
                 return (
                   <>
                     <div className="responsive-container-block img-cont grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-                      {row1.map((item) => (
-                        <div key={item.id} className="img">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setGalleryLightboxItem({
-                                type: item.type,
-                                caption: item.caption,
-                                imageBase64: item.imageBase64,
-                                imageUrl: item.imageUrl,
-                                videoYoutubeUrl: item.videoYoutubeUrl,
-                                videoUrl: item.videoUrl,
-                              })
-                              setGalleryLightboxOpen(true)
-                            }}
-                            className="w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm min-h-[180px] sm:min-h-[200px] flex flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                          >
-                            <div className="w-full flex-1 min-h-[160px] flex items-center justify-center bg-gray-200 overflow-hidden">
-                              {item.type === 'image' ? (
-                                item.imageBase64 && item.imageBase64.startsWith('data:') ? (
-                                  <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
-                                ) : item.imageUrl ? (
-                                  <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
-                                ) : (
-                                  <svg className="w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
-                                )
-                              ) : item.videoYoutubeUrl ? (() => {
-                                const m = item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
-                                const vid = m ? m[1] : null
-                                return vid ? (
-                                  <div className="relative w-full h-full min-h-[160px] bg-black">
-                                    <img src={`https://img.youtube.com/vi/${vid}/mqdefault.jpg`} alt="" className="w-full h-full object-contain" />
-                                    <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center"><svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></span></span>
-                                  </div>
-                                ) : null
-                              })() : item.videoUrl ? (
-                                <div className="w-full h-full flex items-center justify-center bg-black text-white">
-                                  <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                </div>
-                              ) : null}
-                            </div>
-                            {item.caption && <p className="p-2 text-sm text-gray-600 text-center border-t border-gray-200 bg-white">{item.caption}</p>}
-                          </button>
-                        </div>
-                      ))}
+                      {row1.map((item) => <Card key={item.id} item={item} />)}
                     </div>
                     <div className="responsive-container-block img-cont grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-                      {row2.map((item) => (
-                        <div key={item.id} className="img">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setGalleryLightboxItem({
-                                type: item.type,
-                                caption: item.caption,
-                                imageBase64: item.imageBase64,
-                                imageUrl: item.imageUrl,
-                                videoYoutubeUrl: item.videoYoutubeUrl,
-                                videoUrl: item.videoUrl,
-                              })
-                              setGalleryLightboxOpen(true)
-                            }}
-                            className="w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm min-h-[180px] sm:min-h-[200px] flex flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                          >
-                            <div className="w-full flex-1 min-h-[160px] flex items-center justify-center bg-gray-200 overflow-hidden">
-                              {item.type === 'image' ? (
-                                item.imageBase64 && item.imageBase64.startsWith('data:') ? (
-                                  <img src={item.imageBase64} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
-                                ) : item.imageUrl ? (
-                                  <img src={item.imageUrl} alt={item.caption ?? 'Gallery'} className="w-full h-full object-contain" />
-                                ) : (
-                                  <svg className="w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
-                                )
-                              ) : item.videoYoutubeUrl ? (() => {
-                                const m = item.videoYoutubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
-                                const vid = m ? m[1] : null
-                                return vid ? (
-                                  <div className="relative w-full h-full min-h-[160px] bg-black">
-                                    <img src={`https://img.youtube.com/vi/${vid}/mqdefault.jpg`} alt="" className="w-full h-full object-contain" />
-                                    <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center"><svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg></span></span>
-                                  </div>
-                                ) : null
-                              })() : item.videoUrl ? (
-                                <div className="w-full h-full flex items-center justify-center bg-black text-white">
-                                  <svg className="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                </div>
-                              ) : null}
-                            </div>
-                            {item.caption && <p className="p-2 text-sm text-gray-600 text-center border-t border-gray-200 bg-white">{item.caption}</p>}
-                          </button>
-                        </div>
-                      ))}
+                      {row2.map((item) => <Card key={item.id} item={item} />)}
                     </div>
                   </>
                 )
