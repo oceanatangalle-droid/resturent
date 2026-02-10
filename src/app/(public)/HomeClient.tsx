@@ -303,8 +303,8 @@ export default function HomeClient({
           <div className="section-container">
             <div className={`max-w-5xl mx-auto ${homeContent.discountImageBase64 ? 'flex flex-col md:flex-row md:items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12' : 'text-center'}`}>
               {homeContent.discountImageBase64 && (
-                <div className="flex-shrink-0 mx-auto md:mx-0 w-full max-w-[280px] sm:max-w-xs md:w-[38%] md:max-w-[360px] aspect-[4/3] min-h-[180px]">
-                  <img src={homeContent.discountImageBase64} alt={homeContent.discountTitle ?? 'Special Offer'} width={360} height={270} className="rounded-xl shadow-lg max-h-48 sm:max-h-56 md:max-h-64 w-full h-auto object-cover" />
+                <div className="flex-shrink-0 mx-auto md:mx-0 w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] aspect-square overflow-hidden rounded-xl shadow-lg bg-gray-100">
+                  <img src={homeContent.discountImageBase64} alt={homeContent.discountTitle ?? 'Special Offer'} width={320} height={320} className="w-full h-full object-contain" />
                 </div>
               )}
               <div className={homeContent.discountImageBase64 ? 'flex-1 min-w-0 text-center md:text-left' : 'max-w-3xl mx-auto text-center'}>
