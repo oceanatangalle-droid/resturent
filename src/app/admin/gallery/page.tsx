@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import type { GalleryItem } from '@/lib/store'
 
+function getYouTubeId(url: string | undefined): string | null {
+  if (!url || typeof url !== 'string') return null
+  const m = url.trim().match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
 export default function AdminGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -301,22 +307,35 @@ export default function AdminGalleryPage() {
             <p className="text-zinc-500 text-sm">No items yet. Add an image or video above.</p>
           ) : (
             <ul className="space-y-4">
-              {items.map((item) => (
+              {items.map((item) => {
+                const ytId = item.type === 'video' ? getYouTubeId(item.videoYoutubeUrl) : null
+                const videoThumbUrl = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null
+                return (
                 <li
                   key={item.id}
                   className="flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700"
                 >
-                  <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden bg-zinc-800 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-40 h-28 rounded-lg overflow-hidden bg-zinc-800 flex items-center justify-center">
                     {item.type === 'image' ? (
                       item.imageBase64 ? (
-                        <img src={item.imageBase64} alt="" className="w-full h-full object-cover" />
+                        <img src={item.imageBase64} alt="" className="w-full h-full object-contain" />
                       ) : item.imageUrl ? (
-                        <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                        <img src={item.imageUrl} alt="" className="w-full h-full object-contain" />
                       ) : (
                         <span className="text-zinc-500 text-xs">Image</span>
                       )
+                    ) : videoThumbUrl ? (
+                      <div className="relative w-full h-full">
+                        <img src={videoThumbUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                        </span>
+                      </div>
                     ) : (
-                      <span className="text-zinc-500 text-xs">Video</span>
+                      <div className="flex flex-col items-center justify-center gap-1 text-zinc-500">
+                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        <span className="text-xs">Video</span>
+                      </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -325,8 +344,9 @@ export default function AdminGalleryPage() {
                       {item.caption ? ` — ${item.caption}` : ''}
                     </p>
                     {item.type === 'video' && (
-                      <p className="text-xs text-zinc-500 truncate">
-                        {item.videoYoutubeUrl || item.videoUrl || ''}
+                      <p className="text-xs text-zinc-500 truncate mt-1" title={item.videoYoutubeUrl || item.videoUrl || ''}>
+                        {item.videoYoutubeUrl ? 'YouTube' : item.videoUrl ? 'Direct video' : '—'}
+                        {item.videoYoutubeUrl && item.videoUrl ? ' + direct' : ''}
                       </p>
                     )}
                   </div>
@@ -338,7 +358,7 @@ export default function AdminGalleryPage() {
                     Remove
                   </button>
                 </li>
-              ))}
+              );})}
             </ul>
           )}
         </div>

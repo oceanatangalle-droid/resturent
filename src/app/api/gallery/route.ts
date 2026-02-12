@@ -13,7 +13,18 @@ function isAdmin(): boolean {
 
 export async function GET() {
   const items = await getGalleryItems()
-  return NextResponse.json(items)
+  // Ensure camelCase for frontend (in case any layer returns snake_case)
+  const normalized = items.map((it) => ({
+    id: it.id,
+    type: it.type,
+    sortOrder: it.sortOrder,
+    caption: it.caption,
+    imageBase64: it.imageBase64,
+    imageUrl: it.imageUrl,
+    videoYoutubeUrl: it.videoYoutubeUrl,
+    videoUrl: it.videoUrl,
+  }))
+  return NextResponse.json(normalized)
 }
 
 function parseYouTubeId(url: string): string | null {
