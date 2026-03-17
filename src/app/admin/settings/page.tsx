@@ -12,6 +12,9 @@ interface SiteSettings {
   instagramUrl: string
   googleBusinessUrl: string
   tripadvisorUrl: string
+  ratingValue: string
+  reviewCount: string
+  priceRange: string
 }
 
 const CURRENCY_OPTIONS: { code: string; symbol: string; label: string }[] = [
@@ -49,6 +52,9 @@ export default function AdminSettings() {
         instagramUrl: d?.instagramUrl ?? '',
         googleBusinessUrl: d?.googleBusinessUrl ?? '',
         tripadvisorUrl: d?.tripadvisorUrl ?? '',
+        ratingValue: d?.ratingValue ?? '',
+        reviewCount: d?.reviewCount != null ? String(d.reviewCount) : '',
+        priceRange: d?.priceRange ?? '',
       }))
       .catch(() => setData(null))
       .finally(() => setLoading(false))
@@ -60,11 +66,15 @@ export default function AdminSettings() {
     setError('')
     setSaving(true)
     setSaved(false)
+    const payload = {
+      ...data,
+      reviewCount: data.reviewCount ? parseInt(data.reviewCount, 10) : null,
+    }
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) {
         setError('Failed to save. Please try again.')
@@ -211,6 +221,46 @@ export default function AdminSettings() {
                   value={data.tripadvisorUrl}
                   onChange={(e) => setData({ ...data, tripadvisorUrl: e.target.value })}
                   placeholder="https://tripadvisor.com/..."
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-base font-semibold text-white mb-4">SEO: Ratings & price range</h2>
+            <p className="text-sm text-zinc-400 mb-3">
+              Optional. Used for rich snippets (stars and price in search results). Use values from Google or TripAdvisor. Leave blank to hide.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Rating (e.g. 4.7)</label>
+                <input
+                  type="text"
+                  value={data.ratingValue}
+                  onChange={(e) => setData({ ...data, ratingValue: e.target.value })}
+                  placeholder="4.7"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Review count</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={data.reviewCount}
+                  onChange={(e) => setData({ ...data, reviewCount: e.target.value })}
+                  placeholder="812"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Price range (e.g. $, $$, $$$, $$ - $$$)</label>
+                <input
+                  type="text"
+                  value={data.priceRange}
+                  onChange={(e) => setData({ ...data, priceRange: e.target.value })}
+                  placeholder="$$ - $$$"
                   className={inputClass}
                 />
               </div>
