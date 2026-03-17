@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
-import { SpeedInsights } from '@vercel/speed-insights/next'
-import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import ErrorBoundary from '@/components/ErrorBoundary'
-import { getSettings } from '@/lib/store'
+import { JsonLdRestaurant } from '@/components/JsonLdRestaurant'
+import { getSettings, getHome } from '@/lib/store'
+import CookieConsentBanner from '@/components/CookieConsentBanner'
+import AnalyticsWrapper from '@/components/AnalyticsWrapper'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
+
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  ''
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -16,13 +23,18 @@ export const viewport: Viewport = {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings()
+  const [settings, home] = await Promise.all([getSettings(), getHome()])
   const siteName = settings?.siteName ?? 'Veloria Restaurant'
   const title = `${siteName} - Fine Dining Experience`
-  const description = 'Experience exceptional cuisine in an elegant atmosphere. Reserve your table and explore our menu.'
+  const description =
+    home?.subtitle?.trim() ||
+    'Experience exceptional cuisine in an elegant atmosphere. Reserve your table and explore our menu.'
+  const canonical = baseUrl ? { url: baseUrl } : undefined
   return {
     title,
     description,
+    metadataBase: baseUrl ? new URL(baseUrl) : undefined,
+    alternates: canonical ? { canonical } : undefined,
     icons: {
       icon: '/api/site/favicon',
     },
@@ -30,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: 'website',
+      url: baseUrl || undefined,
     },
     twitter: {
       card: 'summary_large_image',
@@ -48,13 +61,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <JsonLdRestaurant />
+        </Suspense>
         <ErrorBoundary>
           <Suspense fallback={null}>
             {children}
           </Suspense>
         </ErrorBoundary>
-        <SpeedInsights />
-        <Analytics />
+        <CookieConsentBanner />
+        <AnalyticsTracker />
+        {/* Vercel analytics, only when user consented to analytics cookies */}
+        <AnalyticsWrapper />
       </body>
     </html>
   )

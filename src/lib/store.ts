@@ -10,6 +10,7 @@ import {
   reservations as reservationsTable,
   contactSubmissions as contactSubmissionsTable,
   galleryItems as galleryItemsTable,
+  analyticsEvents,
 } from './db/schema'
 
 export interface MenuCategory {
@@ -75,6 +76,9 @@ export interface SiteSettingsData {
   instagramUrl: string
   googleBusinessUrl: string
   tripadvisorUrl: string
+  ratingValue?: string | null
+  reviewCount?: number | null
+  priceRange?: string | null
 }
 
 export type ReservationStatus = 'pending' | 'accepted' | 'rejected'
@@ -113,6 +117,15 @@ export interface GalleryItem {
   imageUrl?: string
   videoYoutubeUrl?: string
   videoUrl?: string
+}
+
+export interface AnalyticsEvent {
+  id: string
+  path: string
+  referrer?: string
+  countryCode?: string
+  city?: string
+  createdAt: string
 }
 
 // ---- In-memory fallback when DATABASE_URL is not set ----
@@ -185,7 +198,11 @@ let memorySettings: SiteSettingsData = {
   instagramUrl: '',
   googleBusinessUrl: '',
   tripadvisorUrl: '',
+  ratingValue: null,
+  reviewCount: null,
+  priceRange: null,
 }
+const memoryAnalyticsEvents: AnalyticsEvent[] = []
 let nextCategoryId = 5
 let nextItemId = 13
 
@@ -392,17 +409,32 @@ export async function updateBranding(data: Partial<SiteBrandingData>): Promise<S
 export async function getSettings(): Promise<SiteSettingsData> {
   if (db) {
     const [row] = await db.select().from(siteSettings).where(eq(siteSettings.id, 1))
-    if (row)
+    if (row) {
+      const r = row as {
+        siteName?: string
+        facebookUrl?: string
+        whatsappUrl?: string
+        instagramUrl?: string
+        googleBusinessUrl?: string
+        tripadvisorUrl?: string
+        ratingValue?: string | null
+        reviewCount?: number | null
+        priceRange?: string | null
+      }
       return {
-        siteName: (row as { siteName?: string }).siteName ?? 'Veloria Restaurant',
+        siteName: r.siteName ?? 'Veloria Restaurant',
         currencySymbol: row.currencySymbol ?? '$',
         currencyCode: row.currencyCode ?? 'USD',
-        facebookUrl: (row as { facebookUrl?: string }).facebookUrl ?? '',
-        whatsappUrl: (row as { whatsappUrl?: string }).whatsappUrl ?? '',
-        instagramUrl: (row as { instagramUrl?: string }).instagramUrl ?? '',
-        googleBusinessUrl: (row as { googleBusinessUrl?: string }).googleBusinessUrl ?? '',
-        tripadvisorUrl: (row as { tripadvisorUrl?: string }).tripadvisorUrl ?? '',
+        facebookUrl: r.facebookUrl ?? '',
+        whatsappUrl: r.whatsappUrl ?? '',
+        instagramUrl: r.instagramUrl ?? '',
+        googleBusinessUrl: r.googleBusinessUrl ?? '',
+        tripadvisorUrl: r.tripadvisorUrl ?? '',
+        ratingValue: r.ratingValue ?? null,
+        reviewCount: r.reviewCount ?? null,
+        priceRange: r.priceRange ?? null,
       }
+    }
   }
   return { ...memorySettings }
 }
@@ -418,6 +450,9 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
     instagramUrl: data.instagramUrl !== undefined ? data.instagramUrl : current.instagramUrl,
     googleBusinessUrl: data.googleBusinessUrl !== undefined ? data.googleBusinessUrl : current.googleBusinessUrl,
     tripadvisorUrl: data.tripadvisorUrl !== undefined ? data.tripadvisorUrl : current.tripadvisorUrl,
+    ratingValue: data.ratingValue !== undefined ? data.ratingValue : current.ratingValue,
+    reviewCount: data.reviewCount !== undefined ? data.reviewCount : current.reviewCount,
+    priceRange: data.priceRange !== undefined ? data.priceRange : current.priceRange,
   }
   if (db) {
     await db
@@ -432,6 +467,9 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
         instagramUrl: next.instagramUrl,
         googleBusinessUrl: next.googleBusinessUrl,
         tripadvisorUrl: next.tripadvisorUrl,
+        ratingValue: next.ratingValue ?? undefined,
+        reviewCount: next.reviewCount ?? undefined,
+        priceRange: next.priceRange ?? undefined,
       })
       .onConflictDoUpdate({
         target: siteSettings.id,
@@ -444,6 +482,9 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
           instagramUrl: next.instagramUrl,
           googleBusinessUrl: next.googleBusinessUrl,
           tripadvisorUrl: next.tripadvisorUrl,
+          ratingValue: next.ratingValue ?? undefined,
+          reviewCount: next.reviewCount ?? undefined,
+          priceRange: next.priceRange ?? undefined,
         },
       })
     return getSettings()
@@ -666,4 +707,68 @@ export async function deleteGalleryItem(id: string): Promise<void> {
   }
   const idx = memoryGalleryItems.findIndex((x) => x.id === id)
   if (idx !== -1) memoryGalleryItems.splice(idx, 1)
+}
+
+// ---- Analytics (first‑party, used in admin dashboard) ----
+
+export async function addAnalyticsEvent(data: {
+  path: string
+  referrer?: string
+  countryCode?: string
+  city?: string
+  userAgent?: string
+}): Promise<void> {
+  const createdAt = new Date()
+  if (db) {
+    await db.insert(analyticsEvents).values({
+      path: data.path,
+      referrer: data.referrer ?? null,
+      countryCode: data.countryCode ?? null,
+      city: data.city ?? null,
+      userAgent: data.userAgent ?? null,
+      createdAt,
+    })
+    return
+  }
+  memoryAnalyticsEvents.push({
+    id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    path: data.path,
+    referrer: data.referrer,
+    countryCode: data.countryCode,
+    city: data.city,
+    createdAt: createdAt.toISOString(),
+  })
+}
+
+export async function getAnalyticsSummary(): Promise<{
+  totalEvents: number
+  byCountry: { countryCode: string; count: number }[]
+}> {
+  if (db) {
+    const rows = await db.select().from(analyticsEvents)
+
+    const totalEvents = rows.length
+    const map = new Map<string, number>()
+    for (const row of rows) {
+      const code = row.countryCode
+      if (!code) continue
+      map.set(code, (map.get(code) ?? 0) + 1)
+    }
+    const byCountry = Array.from(map.entries()).map(([countryCode, count]) => ({
+      countryCode,
+      count,
+    }))
+
+    return { totalEvents, byCountry }
+  }
+
+  const totalEvents = memoryAnalyticsEvents.length
+  const map = new Map<string, number>()
+  for (const evt of memoryAnalyticsEvents) {
+    if (!evt.countryCode) continue
+    map.set(evt.countryCode, (map.get(evt.countryCode) ?? 0) + 1)
+  }
+  const byCountry = Array.from(map.entries()).map(([countryCode, count]) => ({ countryCode, count }))
+
+  return { totalEvents, byCountry }
 }

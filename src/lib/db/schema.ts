@@ -78,6 +78,10 @@ export const siteSettings = pgTable('site_settings', {
   instagramUrl: varchar('instagram_url', { length: 512 }).notNull().default(''),
   googleBusinessUrl: varchar('google_business_url', { length: 512 }).notNull().default(''),
   tripadvisorUrl: varchar('tripadvisor_url', { length: 512 }).notNull().default(''),
+  // SEO: aggregate rating (e.g. from Google/TripAdvisor) and price range for rich snippets
+  ratingValue: varchar('rating_value', { length: 16 }), // e.g. "4.7"
+  reviewCount: integer('review_count'), // e.g. 812
+  priceRange: varchar('price_range', { length: 16 }), // e.g. "$", "$$", "$$$", "$$ - $$$"
 })
 
 export const reservations = pgTable('reservations', {
@@ -117,6 +121,17 @@ export const galleryItems = pgTable('gallery_items', {
   videoUrl: text('video_url'),
 })
 
+// Lightweight first‑party analytics events for the admin dashboard
+export const analyticsEvents = pgTable('analytics_events', {
+  id: serial('id').primaryKey(),
+  path: varchar('path', { length: 512 }).notNull(),
+  referrer: text('referrer'),
+  countryCode: varchar('country_code', { length: 2 }), // ISO 3166-1 alpha-2, e.g. "US"
+  city: varchar('city', { length: 255 }),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type SiteBrandingRow = typeof siteBranding.$inferSelect
 export type SiteSettingsRow = typeof siteSettings.$inferSelect
 export type MenuCategoryRow = typeof menuCategories.$inferSelect
@@ -126,3 +141,4 @@ export type HomeContentRow = typeof homeContent.$inferSelect
 export type ReservationRow = typeof reservations.$inferSelect
 export type ContactSubmissionRow = typeof contactSubmissions.$inferSelect
 export type GalleryItemRow = typeof galleryItems.$inferSelect
+export type AnalyticsEventRow = typeof analyticsEvents.$inferSelect

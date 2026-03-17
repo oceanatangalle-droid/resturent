@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import AnalyticsWorldMap from '@/components/admin/AnalyticsWorldMap'
 import { IconMenu, IconReservations, IconContact, IconHome, IconBranding, IconSpecialOffer, IconSettings, IconMail } from '@/components/admin/AdminIcons'
 
 const cards = [
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
         subtitle="Manage your restaurant content and reservations."
       />
       {stats !== null && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
             <p className="text-sm font-medium text-zinc-400">Reservations</p>
             <p className="text-2xl font-semibold text-white mt-1">{stats.reservations}</p>
@@ -59,24 +60,29 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {cards.map(({ href, title, desc, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="group flex items-start gap-4 bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-200"
-          >
-            <span className="w-10 h-10 rounded-lg bg-zinc-800 text-zinc-400 group-hover:bg-primary-600/20 group-hover:text-primary-400 flex items-center justify-center shrink-0 transition-colors">
-              <Icon />
-            </span>
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">
-                {title}
-              </h2>
-              <p className="text-sm text-zinc-400 mt-0.5">{desc}</p>
-            </div>
-          </Link>
-        ))}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2">
+          <AnalyticsWorldMap />
+        </div>
+        <div className="space-y-3">
+          {cards.map(({ href, title, desc, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex items-start gap-4 bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-200"
+            >
+              <span className="w-9 h-9 rounded-lg bg-zinc-800 text-zinc-400 group-hover:bg-primary-600/20 group-hover:text-primary-400 flex items-center justify-center shrink-0 transition-colors">
+                <Icon />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors">
+                  {title}
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">{desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   )
