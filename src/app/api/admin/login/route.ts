@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
+import { ADMIN_COOKIE_NAME } from '@/app/api/admin/session-constants'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin'
-const COOKIE_NAME = 'admin_session'
 
 export async function POST(request: Request) {
   try {
     const { password } = await request.json()
     if (password === ADMIN_PASSWORD) {
       const res = NextResponse.json({ ok: true })
-      res.cookies.set(COOKIE_NAME, '1', {
+      res.cookies.set(ADMIN_COOKIE_NAME, '1', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

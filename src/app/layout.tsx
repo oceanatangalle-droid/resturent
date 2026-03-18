@@ -70,7 +70,9 @@ export default function RootLayout({
           </Suspense>
         </ErrorBoundary>
         <CookieConsentBanner />
-        <AnalyticsTracker />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         {/* Vercel analytics, only when user consented to analytics cookies */}
         <AnalyticsWrapper />
       </body>

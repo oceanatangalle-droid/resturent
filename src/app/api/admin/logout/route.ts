@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-
-const COOKIE_NAME = 'admin_session'
+import { ADMIN_COOKIE_NAME } from '@/app/api/admin/session-constants'
 
 export async function POST() {
   const res = NextResponse.json({ ok: true })
-  res.cookies.set(COOKIE_NAME, '', { path: '/', maxAge: 0 })
+  res.cookies.set(ADMIN_COOKIE_NAME, '', { path: '/', maxAge: 0 })
   return res
 }
