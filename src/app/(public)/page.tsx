@@ -3,6 +3,9 @@ import HomeClient from './HomeClient'
 
 export const revalidate = 3600
 
+// This is a server component. For real loading UI during data fetch, we would use 
+// loading.tsx or Suspense. For now we keep data fetching here.
+
 export default async function HomePage() {
   let homeData: any
   let items: any[] = []
