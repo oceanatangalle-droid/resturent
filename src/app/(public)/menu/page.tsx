@@ -78,7 +78,9 @@ function MenuContent() {
     ]).then(([catList, itemList]: [{ name: string }[], MenuItem[]]) => {
       if (catList?.length) setCategories(catList.map((c) => c.name))
       if (itemList?.length) setMenuItems(itemList)
-    }).catch(() => {})
+    }).catch((err) => {
+      console.warn('Failed to load menu data:', err)
+    })
   }, [])
 
   // Reset visible count when filters change so infinite scroll starts fresh

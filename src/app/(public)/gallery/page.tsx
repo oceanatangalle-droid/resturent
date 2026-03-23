@@ -2,7 +2,13 @@ import { getGalleryItems } from '@/lib/store'
 import GalleryClient from './GalleryClient'
 
 export default async function GalleryPage() {
-  const items = await getGalleryItems()
+  let items: any[] = []
+  try {
+    items = await getGalleryItems()
+  } catch (error) {
+    console.warn('Gallery data not available during build')
+  }
+
   const initialGallery = items.map((g) => ({
     id: g.id,
     type: g.type,

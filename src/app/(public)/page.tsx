@@ -1,10 +1,29 @@
 import { getHome, getItems, getGalleryItems } from '@/lib/store'
 import HomeClient from './HomeClient'
 
-export const revalidate = 3600 // Revalidate every hour (good for restaurant content that changes infrequently)
+export const revalidate = 3600
 
 export default async function HomePage() {
-  const [homeData, items, gallery] = await Promise.all([getHome(), getItems(), getGalleryItems()])
+  let homeData: any
+  let items: any[] = []
+  let gallery: any[] = []
+
+  try {
+    const data = await Promise.all([
+      getHome(),
+      getItems(),
+      getGalleryItems()
+    ])
+    homeData = data[0]
+    items = data[1]
+    gallery = data[2]
+  } catch (error) {
+    // Graceful fallback during build/Vercel if DB not ready
+    console.warn('DB not available during build, using minimal data')
+    homeData = { featuredMenuLimit: 6 }
+    items = []
+    gallery = []
+  }
   const limit = homeData.featuredMenuLimit ?? 6
   const featured = items.slice(0, limit).map((item) => ({
     id: String(item.id),
