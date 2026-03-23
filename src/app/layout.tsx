@@ -13,8 +13,7 @@ const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-  ''
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
 export const viewport: Viewport = {
   width: 'device-width',
