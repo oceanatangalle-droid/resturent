@@ -30,6 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     home?.subtitle?.trim() ||
     'Experience exceptional cuisine in an elegant atmosphere. Reserve your table and explore our menu.'
   const canonical = baseUrl ? { url: baseUrl } : undefined
+
   return {
     title,
     description,
@@ -43,13 +44,32 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       type: 'website',
       url: baseUrl || undefined,
+      images: [
+        {
+          url: `${baseUrl}/api/site/logo`,
+          width: 1200,
+          height: 630,
+          alt: siteName,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
     },
-    robots: 'index, follow',
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+      },
+    },
+    other: {
+      'format-detection': 'telephone=no',
+    },
   }
 }
 

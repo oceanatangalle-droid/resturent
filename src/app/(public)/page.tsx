@@ -1,8 +1,7 @@
 import { getHome, getItems, getGalleryItems } from '@/lib/store'
 import HomeClient from './HomeClient'
 
-// Avoid DB connection exhaustion during build (many pages generated in parallel)
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour (good for restaurant content that changes infrequently)
 
 export default async function HomePage() {
   const [homeData, items, gallery] = await Promise.all([getHome(), getItems(), getGalleryItems()])

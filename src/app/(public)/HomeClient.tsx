@@ -290,7 +290,7 @@ export default function HomeClient({
 
   return (
     <div ref={containerRef} className="min-h-screen bg-white">
-      <section ref={heroRef} className="relative min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] flex items-center text-gray-900 overflow-hidden">
+      <section ref={heroRef} className="relative min-h-[75vh] sm:min-h-[80vh] md:min-h-[85vh] lg:min-h-[90vh] flex items-center text-gray-900 overflow-hidden">
         {/* Background image (from admin) or fallback gradient */}
         {homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? (
           <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${homeContent.heroBackgroundImageBase64})` }} aria-hidden />
@@ -304,7 +304,7 @@ export default function HomeClient({
         <div className="section-container relative z-10 w-full py-12 sm:py-16 md:py-24 lg:py-32">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
             <div ref={heroContentRef} className="max-w-3xl w-full lg:col-span-7">
-              <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 tracking-tight flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-1 ${homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
+              <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[4.5rem] font-bold mb-5 sm:mb-7 tracking-[-0.03em] flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 ${homeContent.heroBackgroundImageBase64 && homeContent.heroBackgroundImageBase64.startsWith('data:') ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
                 {(homeContent.heroWords.length ? homeContent.heroWords : ['Welcome', 'to', 'Veloria']).map((word, i) => (
                   <span key={`${word}-${i}`} ref={(el) => { if (el) titleWordsRef.current[i] = el }} className="inline-block">{word}</span>
                 ))}
@@ -505,9 +505,9 @@ export default function HomeClient({
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{homeContent.menuSectionTitle}</h2>
                 <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-1">{homeContent.menuSectionSubtitle}</p>
               </div>
-              <div ref={menuCardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              <div ref={menuCardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
                 {featuredMenuItems.slice(0, displayedFeaturedCount).map((item) => (
-                  <div key={item.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 min-w-0 min-h-[140px]">
+                  <div key={item.id} className="menu-card bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 hover:border-gray-200 transition-all duration-300 min-w-0 min-h-[160px] shadow-sm">
                     <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
                       <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate min-w-0">{item.name}</h3>
                       <span className="text-primary-500 font-bold text-base sm:text-lg flex-shrink-0">{formatPrice(item.price, currencySymbol)}</span>

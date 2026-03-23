@@ -128,17 +128,11 @@ export interface AnalyticsEvent {
   createdAt: string
 }
 
-let dbFallbackWarned = false
-async function tryDb<T>(op: () => Promise<T>): Promise<T | undefined> {
-  if (!db) return undefined
-  try {
-    return await op()
-  } catch (err) {
-    if (!dbFallbackWarned) {
-      dbFallbackWarned = true
-      console.warn('DB query failed; falling back to in-memory defaults.', err)
-    }
-    return undefined
+async function ensureDb() {
+  if (!db) {
+    throw new Error(
+      'DATABASE_URL is not configured. Please set the DATABASE_URL environment variable to connect to PostgreSQL.'
+    )
   }
 }
 
@@ -230,9 +224,9 @@ function rowToItem(r: { id: number; name: string; description: string; price: st
 // ---- API ----
 
 export async function getCategories(): Promise<MenuCategory[]> {
-  const rows = await tryDb(() => db!.select().from(menuCategories).orderBy(asc(menuCategories.sortOrder)))
-  if (rows) return rows.map(rowToCategory)
-  return [...memoryCategories].sort((a, b) => a.sortOrder - b.sortOrder)
+  await ensureDb()
+  const rows = await db!.select().from(menuCategories).orderBy(asc(menuCategories.sortOrder))
+  return rows.map(rowToCategory)
 }
 
 export async function addCategory(name: string): Promise<MenuCategory> {
@@ -272,9 +266,9 @@ export async function deleteCategory(id: string): Promise<void> {
 }
 
 export async function getItems(): Promise<MenuItem[]> {
-  const rows = await tryDb(() => db!.select().from(menuItems).orderBy(asc(menuItems.sortOrder)))
-  if (rows) return rows.map(rowToItem)
-  return [...memoryItems].sort((a, b) => a.sortOrder - b.sortOrder)
+  await ensureDb()
+  const rows = await db!.select().from(menuItems).orderBy(asc(menuItems.sortOrder))
+  return rows.map(rowToItem)
 }
 
 export async function addItem(data: { name: string; description: string; price: string; category: string }): Promise<MenuItem> {
@@ -310,19 +304,21 @@ export async function deleteItem(id: string): Promise<void> {
 }
 
 export async function getContact(): Promise<ContactInfo> {
-  const rows = await tryDb(() => db!.select().from(contactInfo).where(eq(contactInfo.id, 1)))
+  await ensureDb()
+  const rows = await db!.select().from(contactInfo).where(eq(contactInfo.id, 1))
   const row = rows?.[0]
-  if (row)
-    return {
-      heading: row.heading,
-      intro: row.intro,
-      address: row.address,
-      addressLine2: row.addressLine2,
-      phone: row.phone,
-      email: row.email,
-      hours: row.hours,
-    }
-  return { ...memoryContact }
+  if (!row) {
+    throw new Error('Contact information not found in database. Please run migrations.')
+  }
+  return {
+    heading: row.heading,
+    intro: row.intro,
+    address: row.address,
+    addressLine2: row.addressLine2,
+    phone: row.phone,
+    email: row.email,
+    hours: row.hours,
+  }
 }
 
 export async function updateContact(data: Partial<ContactInfo>): Promise<ContactInfo> {
@@ -335,35 +331,36 @@ export async function updateContact(data: Partial<ContactInfo>): Promise<Contact
 }
 
 export async function getHome(): Promise<HomeContent> {
-  const rows = await tryDb(() => db!.select().from(homeContent).where(eq(homeContent.id, 1)))
+  await ensureDb()
+  const rows = await db!.select().from(homeContent).where(eq(homeContent.id, 1))
   const row = rows?.[0]
-  if (row) {
-    const visible = row.discountVisible !== undefined ? row.discountVisible !== 0 : true
-    return {
-      heroWords: Array.isArray(row.heroWords) ? row.heroWords : ['Welcome', 'to', 'Veloria'],
-      subtitle: row.subtitle,
-      heroBackgroundImageBase64: (row as { heroBackgroundImageBase64?: string }).heroBackgroundImageBase64 ?? '',
-      heroRightImageBase64: (row as { heroRightImageBase64?: string }).heroRightImageBase64 ?? '',
-      aboutTitle: row.aboutTitle,
-      aboutText: row.aboutText,
-      feature1Title: row.feature1Title,
-      feature1Text: row.feature1Text,
-      feature2Title: row.feature2Title,
-      feature2Text: row.feature2Text,
-      feature3Title: row.feature3Title,
-      feature3Text: row.feature3Text,
-      menuSectionTitle: row.menuSectionTitle,
-      menuSectionSubtitle: row.menuSectionSubtitle,
-      featuredMenuLimit: row.featuredMenuLimit,
-      discountVisible: visible,
-      discountTitle: row.discountTitle ?? 'Special Offer',
-      discountSubtitle: row.discountSubtitle ?? '',
-      discountCtaText: row.discountCtaText ?? 'Book Now',
-      discountCtaLink: row.discountCtaLink ?? '/book-a-table',
-      discountImageBase64: (row as { discountImageBase64?: string }).discountImageBase64 ?? '',
-    }
+  if (!row) {
+    throw new Error('Home content not found in database. Please run migrations.')
   }
-  return { ...memoryHome }
+  const visible = row.discountVisible !== undefined ? row.discountVisible !== 0 : true
+  return {
+    heroWords: Array.isArray(row.heroWords) ? row.heroWords : ['Welcome', 'to', 'Veloria'],
+    subtitle: row.subtitle,
+    heroBackgroundImageBase64: (row as { heroBackgroundImageBase64?: string }).heroBackgroundImageBase64 ?? '',
+    heroRightImageBase64: (row as { heroRightImageBase64?: string }).heroRightImageBase64 ?? '',
+    aboutTitle: row.aboutTitle,
+    aboutText: row.aboutText,
+    feature1Title: row.feature1Title,
+    feature1Text: row.feature1Text,
+    feature2Title: row.feature2Title,
+    feature2Text: row.feature2Text,
+    feature3Title: row.feature3Title,
+    feature3Text: row.feature3Text,
+    menuSectionTitle: row.menuSectionTitle,
+    menuSectionSubtitle: row.menuSectionSubtitle,
+    featuredMenuLimit: row.featuredMenuLimit,
+    discountVisible: visible,
+    discountTitle: row.discountTitle ?? 'Special Offer',
+    discountSubtitle: row.discountSubtitle ?? '',
+    discountCtaText: row.discountCtaText ?? 'Book Now',
+    discountCtaLink: row.discountCtaLink ?? '/book-a-table',
+    discountImageBase64: (row as { discountImageBase64?: string }).discountImageBase64 ?? '',
+  }
 }
 
 export async function updateHome(data: Partial<HomeContent>): Promise<HomeContent> {
@@ -382,14 +379,19 @@ export async function updateHome(data: Partial<HomeContent>): Promise<HomeConten
 }
 
 export async function getBranding(): Promise<SiteBrandingData> {
-  const rows = await tryDb(() => db!.select().from(siteBranding).where(eq(siteBranding.id, 1)))
+  await ensureDb()
+  const rows = await db!.select().from(siteBranding).where(eq(siteBranding.id, 1))
   const row = rows?.[0]
-  if (row)
+  if (row) {
     return {
       faviconBase64: row.faviconBase64 ?? '',
       logoBase64: row.logoBase64 ?? '',
     }
-  return { ...memoryBranding }
+  }
+  return {
+    faviconBase64: '',
+    logoBase64: '',
+  }
 }
 
 export async function updateBranding(data: Partial<SiteBrandingData>): Promise<SiteBrandingData> {
@@ -413,35 +415,39 @@ export async function updateBranding(data: Partial<SiteBrandingData>): Promise<S
 }
 
 export async function getSettings(): Promise<SiteSettingsData> {
-  const rows = await tryDb(() => db!.select().from(siteSettings).where(eq(siteSettings.id, 1)))
+  await ensureDb()
+  const rows = await db!.select().from(siteSettings).where(eq(siteSettings.id, 1))
   const row = rows?.[0]
-  if (row) {
-    const r = row as {
-      siteName?: string
-      facebookUrl?: string
-      whatsappUrl?: string
-      instagramUrl?: string
-      googleBusinessUrl?: string
-      tripadvisorUrl?: string
-      ratingValue?: string | null
-      reviewCount?: number | null
-      priceRange?: string | null
-    }
+  if (!row) {
+    // Return minimal defaults if settings row doesn't exist yet
     return {
-      siteName: r.siteName ?? 'Veloria Restaurant',
-      currencySymbol: row.currencySymbol ?? '$',
-      currencyCode: row.currencyCode ?? 'USD',
-      facebookUrl: r.facebookUrl ?? '',
-      whatsappUrl: r.whatsappUrl ?? '',
-      instagramUrl: r.instagramUrl ?? '',
-      googleBusinessUrl: r.googleBusinessUrl ?? '',
-      tripadvisorUrl: r.tripadvisorUrl ?? '',
-      ratingValue: r.ratingValue ?? null,
-      reviewCount: r.reviewCount ?? null,
-      priceRange: r.priceRange ?? null,
+      siteName: 'Veloria Restaurant',
+      currencySymbol: '$',
+      currencyCode: 'USD',
+      facebookUrl: '',
+      whatsappUrl: '',
+      instagramUrl: '',
+      googleBusinessUrl: '',
+      tripadvisorUrl: '',
+      ratingValue: null,
+      reviewCount: null,
+      priceRange: null,
     }
   }
-  return { ...memorySettings }
+  const r = row as any
+  return {
+    siteName: r.siteName ?? 'Veloria Restaurant',
+    currencySymbol: r.currencySymbol ?? '$',
+    currencyCode: r.currencyCode ?? 'USD',
+    facebookUrl: r.facebookUrl ?? '',
+    whatsappUrl: r.whatsappUrl ?? '',
+    instagramUrl: r.instagramUrl ?? '',
+    googleBusinessUrl: r.googleBusinessUrl ?? '',
+    tripadvisorUrl: r.tripadvisorUrl ?? '',
+    ratingValue: r.ratingValue ?? null,
+    reviewCount: r.reviewCount ?? null,
+    priceRange: r.priceRange ?? null,
+  }
 }
 
 export async function updateSettings(data: Partial<SiteSettingsData>): Promise<SiteSettingsData> {
@@ -659,9 +665,9 @@ function rowToGalleryItem(r: {
 }
 
 export async function getGalleryItems(): Promise<GalleryItem[]> {
-  const rows = await tryDb(() => db!.select().from(galleryItemsTable).orderBy(asc(galleryItemsTable.sortOrder)))
-  if (rows) return rows.map(rowToGalleryItem)
-  return [...memoryGalleryItems].sort((a, b) => a.sortOrder - b.sortOrder)
+  await ensureDb()
+  const rows = await db!.select().from(galleryItemsTable).orderBy(asc(galleryItemsTable.sortOrder))
+  return rows.map(rowToGalleryItem)
 }
 
 export async function addGalleryItem(data: Omit<GalleryItem, 'id'>): Promise<GalleryItem> {

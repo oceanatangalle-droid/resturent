@@ -1,5 +1,7 @@
 'use client'
 
+import { Suspense } from 'react'
+
 import type { RefObject } from 'react'
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
@@ -55,7 +57,7 @@ const defaultItems: MenuItem[] = [
   { id: '12', name: 'Craft Cocktails', description: 'Handcrafted cocktails made with premium spirits', price: '$12-16', category: 'Beverages' },
 ]
 
-export default function Menu() {
+function MenuContent() {
   const settings = useSettings()
   const currencySymbol = settings?.currencySymbol ?? '$'
   const [categories, setCategories] = useState<string[]>(defaultCategories)
@@ -190,7 +192,7 @@ export default function Menu() {
           subtitle="Discover our carefully crafted selection of dishes"
         />
 
-        <section ref={sectionRef} className="py-10 sm:py-12 md:py-16 bg-gray-50">
+        <section ref={sectionRef} className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="section-container w-full">
           {/* Search and filters */}
           <div className="mb-8 sm:mb-12 p-4 sm:p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -289,7 +291,7 @@ export default function Menu() {
                       {group.items.map((item) => (
                         <div
                           key={item.id}
-                          className="bg-white opacity-100 border border-gray-200 rounded-lg p-4 sm:p-6 hover:border-gray-300 transition-colors duration-200 shadow-sm min-w-0 min-h-[120px]"
+                          className="menu-card bg-white opacity-100 border border-gray-200 rounded-2xl p-5 sm:p-7 hover:border-gray-300 shadow-sm min-w-0 min-h-[130px]"
                         >
                           <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
                             <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 break-words">{item.name}</h3>
@@ -348,5 +350,13 @@ export default function Menu() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Menu() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading menu...</div>}>
+      <MenuContent />
+    </Suspense>
   )
 }
