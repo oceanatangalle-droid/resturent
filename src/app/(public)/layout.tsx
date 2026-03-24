@@ -4,6 +4,8 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import WhatsAppButton from '@/components/WhatsAppButton'
 
+export const dynamic = 'force-dynamic'
+
 export default function PublicLayout({
   children,
 }: {

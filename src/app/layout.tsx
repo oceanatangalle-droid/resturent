@@ -22,12 +22,19 @@ export const viewport: Viewport = {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [settings, home] = await Promise.all([getSettings(), getHome()])
-  const siteName = settings?.siteName ?? 'Veloria Restaurant'
-  const title = `${siteName} - Fine Dining Experience`
-  const description =
-    home?.subtitle?.trim() ||
+  let siteName = 'Veloria Restaurant'
+  let description =
     'Experience exceptional cuisine in an elegant atmosphere. Reserve your table and explore our menu.'
+
+  try {
+    const [settings, home] = await Promise.all([getSettings(), getHome()])
+    siteName = settings?.siteName ?? siteName
+    description = home?.subtitle?.trim() || description
+  } catch (error) {
+    console.warn('generateMetadata fallback mode:', error)
+  }
+
+  const title = `${siteName} - Fine Dining Experience`
   const canonical = baseUrl ? { url: baseUrl } : undefined
 
   return {

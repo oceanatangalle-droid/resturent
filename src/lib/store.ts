@@ -224,7 +224,8 @@ function rowToItem(r: { id: number; name: string; description: string; price: st
 
 export async function getCategories(): Promise<MenuCategory[]> {
   await ensureDb()
-  const rows = await db!.select().from(menuCategories).orderBy(asc(menuCategories.sortOrder))
+  if (!db) return [...memoryCategories]
+  const rows = await db.select().from(menuCategories).orderBy(asc(menuCategories.sortOrder))
   return rows.map(rowToCategory)
 }
 
@@ -266,7 +267,8 @@ export async function deleteCategory(id: string): Promise<void> {
 
 export async function getItems(): Promise<MenuItem[]> {
   await ensureDb()
-  const rows = await db!.select().from(menuItems).orderBy(asc(menuItems.sortOrder))
+  if (!db) return [...memoryItems]
+  const rows = await db.select().from(menuItems).orderBy(asc(menuItems.sortOrder))
   return rows.map(rowToItem)
 }
 
@@ -304,10 +306,11 @@ export async function deleteItem(id: string): Promise<void> {
 
 export async function getContact(): Promise<ContactInfo> {
   await ensureDb()
-  const rows = await db!.select().from(contactInfo).where(eq(contactInfo.id, 1))
+  if (!db) return { ...memoryContact }
+  const rows = await db.select().from(contactInfo).where(eq(contactInfo.id, 1))
   const row = rows?.[0]
   if (!row) {
-    throw new Error('Contact information not found in database. Please run migrations.')
+    return { ...memoryContact }
   }
   return {
     heading: row.heading,
@@ -331,10 +334,11 @@ export async function updateContact(data: Partial<ContactInfo>): Promise<Contact
 
 export async function getHome(): Promise<HomeContent> {
   await ensureDb()
-  const rows = await db!.select().from(homeContent).where(eq(homeContent.id, 1))
+  if (!db) return { ...memoryHome }
+  const rows = await db.select().from(homeContent).where(eq(homeContent.id, 1))
   const row = rows?.[0]
   if (!row) {
-    throw new Error('Home content not found in database. Please run migrations.')
+    return { ...memoryHome }
   }
   const visible = row.discountVisible !== undefined ? row.discountVisible !== 0 : true
   return {
@@ -380,7 +384,10 @@ export async function updateHome(data: Partial<HomeContent>): Promise<HomeConten
 export async function getBranding(): Promise<SiteBrandingData> {
   try {
     await ensureDb()
-    const rows = await db!.select().from(siteBranding).where(eq(siteBranding.id, 1))
+    if (!db) {
+      return { ...memoryBranding }
+    }
+    const rows = await db.select().from(siteBranding).where(eq(siteBranding.id, 1))
     const row = rows?.[0]
     if (row) {
       return {
@@ -418,38 +425,31 @@ export async function updateBranding(data: Partial<SiteBrandingData>): Promise<S
 }
 
 export async function getSettings(): Promise<SiteSettingsData> {
-  await ensureDb()
-  const rows = await db!.select().from(siteSettings).where(eq(siteSettings.id, 1))
-  const row = rows?.[0]
-  if (!row) {
-    // Return minimal defaults if settings row doesn't exist yet
-    return {
-      siteName: 'Veloria Restaurant',
-      currencySymbol: '$',
-      currencyCode: 'USD',
-      facebookUrl: '',
-      whatsappUrl: '',
-      instagramUrl: '',
-      googleBusinessUrl: '',
-      tripadvisorUrl: '',
-      ratingValue: null,
-      reviewCount: null,
-      priceRange: null,
+  try {
+    await ensureDb()
+    if (!db) return { ...memorySettings }
+    const rows = await db.select().from(siteSettings).where(eq(siteSettings.id, 1))
+    const row = rows?.[0]
+    if (!row) {
+      return { ...memorySettings }
     }
-  }
-  const r = row as any
-  return {
-    siteName: r.siteName ?? 'Veloria Restaurant',
-    currencySymbol: r.currencySymbol ?? '$',
-    currencyCode: r.currencyCode ?? 'USD',
-    facebookUrl: r.facebookUrl ?? '',
-    whatsappUrl: r.whatsappUrl ?? '',
-    instagramUrl: r.instagramUrl ?? '',
-    googleBusinessUrl: r.googleBusinessUrl ?? '',
-    tripadvisorUrl: r.tripadvisorUrl ?? '',
-    ratingValue: r.ratingValue ?? null,
-    reviewCount: r.reviewCount ?? null,
-    priceRange: r.priceRange ?? null,
+    const r = row as any
+    return {
+      siteName: r.siteName ?? 'Veloria Restaurant',
+      currencySymbol: r.currencySymbol ?? '$',
+      currencyCode: r.currencyCode ?? 'USD',
+      facebookUrl: r.facebookUrl ?? '',
+      whatsappUrl: r.whatsappUrl ?? '',
+      instagramUrl: r.instagramUrl ?? '',
+      googleBusinessUrl: r.googleBusinessUrl ?? '',
+      tripadvisorUrl: r.tripadvisorUrl ?? '',
+      ratingValue: r.ratingValue ?? null,
+      reviewCount: r.reviewCount ?? null,
+      priceRange: r.priceRange ?? null,
+    }
+  } catch (error) {
+    console.warn('getSettings failed, using in-memory fallback:', error)
+    return { ...memorySettings }
   }
 }
 
@@ -469,25 +469,11 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
     priceRange: data.priceRange !== undefined ? data.priceRange : current.priceRange,
   }
   if (db) {
-    await db
-      .insert(siteSettings)
-      .values({
-        id: 1,
-        siteName: next.siteName,
-        currencySymbol: next.currencySymbol,
-        currencyCode: next.currencyCode,
-        facebookUrl: next.facebookUrl,
-        whatsappUrl: next.whatsappUrl,
-        instagramUrl: next.instagramUrl,
-        googleBusinessUrl: next.googleBusinessUrl,
-        tripadvisorUrl: next.tripadvisorUrl,
-        ratingValue: next.ratingValue ?? undefined,
-        reviewCount: next.reviewCount ?? undefined,
-        priceRange: next.priceRange ?? undefined,
-      })
-      .onConflictDoUpdate({
-        target: siteSettings.id,
-        set: {
+    try {
+      await db
+        .insert(siteSettings)
+        .values({
+          id: 1,
           siteName: next.siteName,
           currencySymbol: next.currencySymbol,
           currencyCode: next.currencyCode,
@@ -499,9 +485,27 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
           ratingValue: next.ratingValue ?? undefined,
           reviewCount: next.reviewCount ?? undefined,
           priceRange: next.priceRange ?? undefined,
-        },
-      })
-    return getSettings()
+        })
+        .onConflictDoUpdate({
+          target: siteSettings.id,
+          set: {
+            siteName: next.siteName,
+            currencySymbol: next.currencySymbol,
+            currencyCode: next.currencyCode,
+            facebookUrl: next.facebookUrl,
+            whatsappUrl: next.whatsappUrl,
+            instagramUrl: next.instagramUrl,
+            googleBusinessUrl: next.googleBusinessUrl,
+            tripadvisorUrl: next.tripadvisorUrl,
+            ratingValue: next.ratingValue ?? undefined,
+            reviewCount: next.reviewCount ?? undefined,
+            priceRange: next.priceRange ?? undefined,
+          },
+        })
+      return getSettings()
+    } catch (error) {
+      console.warn('updateSettings failed in DB, using in-memory fallback:', error)
+    }
   }
   memorySettings = next
   return memorySettings
@@ -669,7 +673,8 @@ function rowToGalleryItem(r: {
 
 export async function getGalleryItems(): Promise<GalleryItem[]> {
   await ensureDb()
-  const rows = await db!.select().from(galleryItemsTable).orderBy(asc(galleryItemsTable.sortOrder))
+  if (!db) return [...memoryGalleryItems]
+  const rows = await db.select().from(galleryItemsTable).orderBy(asc(galleryItemsTable.sortOrder))
   return rows.map(rowToGalleryItem)
 }
 
@@ -732,15 +737,19 @@ export async function addAnalyticsEvent(data: {
 }): Promise<void> {
   const createdAt = new Date()
   if (db) {
-    await db.insert(analyticsEvents).values({
-      path: data.path,
-      referrer: data.referrer ?? null,
-      countryCode: data.countryCode ?? null,
-      city: data.city ?? null,
-      userAgent: data.userAgent ?? null,
-      createdAt,
-    })
-    return
+    try {
+      await db.insert(analyticsEvents).values({
+        path: data.path,
+        referrer: data.referrer ?? null,
+        countryCode: data.countryCode ?? null,
+        city: data.city ?? null,
+        userAgent: data.userAgent ?? null,
+        createdAt,
+      })
+      return
+    } catch (error) {
+      console.warn('addAnalyticsEvent failed in DB, using in-memory fallback:', error)
+    }
   }
   memoryAnalyticsEvents.push({
     id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -757,21 +766,25 @@ export async function getAnalyticsSummary(): Promise<{
   byCountry: { countryCode: string; count: number }[]
 }> {
   if (db) {
-    const rows = await db.select().from(analyticsEvents)
+    try {
+      const rows = await db.select().from(analyticsEvents)
 
-    const totalEvents = rows.length
-    const map = new Map<string, number>()
-    for (const row of rows) {
-      const code = row.countryCode
-      if (!code) continue
-      map.set(code, (map.get(code) ?? 0) + 1)
+      const totalEvents = rows.length
+      const map = new Map<string, number>()
+      for (const row of rows) {
+        const code = row.countryCode
+        if (!code) continue
+        map.set(code, (map.get(code) ?? 0) + 1)
+      }
+      const byCountry = Array.from(map.entries()).map(([countryCode, count]) => ({
+        countryCode,
+        count,
+      }))
+
+      return { totalEvents, byCountry }
+    } catch (error) {
+      console.warn('getAnalyticsSummary failed in DB, using in-memory fallback:', error)
     }
-    const byCountry = Array.from(map.entries()).map(([countryCode, count]) => ({
-      countryCode,
-      count,
-    }))
-
-    return { totalEvents, byCountry }
   }
 
   const totalEvents = memoryAnalyticsEvents.length
