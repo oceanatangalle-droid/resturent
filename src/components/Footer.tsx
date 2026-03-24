@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, memo } from 'react'
 import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
 import { useSettings } from '@/contexts/SettingsContext'
 
-const socialIconClass = 'w-5 h-5 text-slate-500 hover:text-primary-600 transition-colors'
+const socialIconClass = 'w-6 h-6 text-gray-500 hover:text-primary-600 transition-colors'
 
 interface ContactInfo {
   address: string
@@ -106,46 +106,46 @@ function Footer() {
   }
 
   return (
-    <footer ref={footerRef} className="bg-slate-50 border-t border-slate-200 text-slate-900 w-full">
-      <div className="section-container py-10 sm:py-12 md:py-14 w-full">
+    <footer ref={footerRef} className="bg-gray-50 border-t border-gray-200 text-gray-900 w-full">
+      <div className="section-container py-8 sm:py-10 md:py-12 w-full">
         <div ref={columnsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div className="min-w-0">
-            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-primary-700">{settings?.siteName ?? 'Veloria Restaurant'}</h3>
-            <p className="text-slate-600 text-sm sm:text-base">
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">{settings?.siteName ?? 'Veloria Restaurant'}</h3>
+            <p className="text-gray-600 text-sm sm:text-base">
               Experience exceptional cuisine in an elegant atmosphere.
               We bring you the finest dining experience.
             </p>
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-slate-900">Explore</h4>
-            <ul className="space-y-1.5 sm:space-y-2 text-slate-600 text-sm sm:text-base">
+            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900">Quick Links</h4>
+            <ul className="space-y-1.5 sm:space-y-2 text-gray-600 text-sm sm:text-base">
               <li>
-                <Link href="/" className="hover:text-slate-900 transition-colors">
+                <Link href="/" className="hover:text-gray-900 transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/menu" className="hover:text-slate-900 transition-colors">
+                <Link href="/menu" className="hover:text-gray-900 transition-colors">
                   Menu
                 </Link>
               </li>
               <li>
-                <Link href="/book-a-table" className="hover:text-slate-900 transition-colors">
-                  Book Table
+                <Link href="/contact" className="hover:text-gray-900 transition-colors">
+                  Contact
                 </Link>
               </li>
               <li>
-                <Link href="/gallery" className="hover:text-slate-900 transition-colors">
-                  Gallery
+                <Link href="/book-a-table" className="hover:text-gray-900 transition-colors">
+                  Book a Table
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-slate-900">Contact Us</h4>
-            <ul className="space-y-1.5 sm:space-y-2 text-slate-600 text-sm sm:text-base">
+            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900">Contact Info</h4>
+            <ul className="space-y-1.5 sm:space-y-2 text-gray-600 text-sm sm:text-base">
               {contact.address && <li>{contact.address}</li>}
               {contact.addressLine2 && <li>{contact.addressLine2}</li>}
               {contact.phone && <li>Phone: {contact.phone}</li>}
@@ -154,7 +154,7 @@ function Footer() {
           </div>
 
           <div className="min-w-0">
-            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-slate-900">Newsletter</h4>
+            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-900">Newsletter</h4>
             <p className="text-gray-600 text-sm mb-2 sm:mb-3">
               Get updates on events, seasonal menus, and special offers.
             </p>
@@ -168,7 +168,7 @@ function Footer() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email"
                   required
-                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition min-h-[44px] sm:min-h-0"
+                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition min-h-[44px] sm:min-h-0"
                   aria-label="Email for newsletter"
                 />
                 <button
@@ -184,7 +184,7 @@ function Footer() {
 
         {/* Social links – center */}
         {settings && (settings.facebookUrl || settings.whatsappUrl || settings.instagramUrl || settings.googleBusinessUrl || settings.tripadvisorUrl) && (
-          <div ref={socialRef} className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-200">
+          <div ref={socialRef} className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
             {settings.facebookUrl && (
               <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center" aria-label="Facebook">
                 <svg className={socialIconClass} fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
@@ -213,7 +213,7 @@ function Footer() {
           </div>
         )}
 
-        <div ref={bottomRef} className="border-t border-slate-200 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-slate-500 text-sm sm:text-base px-2">
+        <div ref={bottomRef} className="border-t border-gray-200 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-500 text-sm sm:text-base px-2">
           <p suppressHydrationWarning>&copy; {new Date().getFullYear()} {settings?.siteName ?? 'Veloria Restaurant'}. All rights reserved.</p>
         </div>
       </div>

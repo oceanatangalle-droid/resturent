@@ -28,16 +28,13 @@ export default function PageHeader({ title, subtitle }: PageHeaderProps) {
   }, [])
 
   return (
-    <section ref={sectionRef} className="bg-slate-50 text-slate-900 py-12 sm:py-16 md:py-20 border-b border-slate-200">
+    <section ref={sectionRef} className="bg-white text-gray-900 py-12 sm:py-16 md:py-20 border-b border-gray-100">
       <div className="section-container text-center w-full">
-        <p className="inline-flex items-center rounded-full bg-primary-100 text-primary-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide mb-4">
-          Our Experience
-        </p>
         <h1 ref={titleRef} className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 tracking-tighter text-gray-900 px-1">
           {title}
         </h1>
-        <div ref={lineRef} className="w-20 h-0.5 bg-primary-500 mx-auto mb-5 sm:mb-6" />
-        <p ref={subtitleRef} className="text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto px-2 leading-relaxed">
+        <div ref={lineRef} className="w-20 h-0.5 bg-primary-600 mx-auto mb-5 sm:mb-6" />
+        <p ref={subtitleRef} className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto px-2 leading-relaxed">
           {subtitle}
         </p>
       </div>

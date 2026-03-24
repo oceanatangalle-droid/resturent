@@ -2,6 +2,8 @@
 
 export const dynamic = 'force-dynamic'
 
+import LoadingSpinner from '@/components/LoadingSpinner'
+
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
@@ -102,24 +104,19 @@ function BookATableContent() {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  const inputClass = 'w-full px-4 py-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition text-slate-900 placeholder-slate-400'
+  const inputClass = 'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition text-gray-900 placeholder-gray-500'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white">
       <PageHeader
-        title="Secure Your Table by the Sea"
-        subtitle="Complete the reservation form and we will confirm your booking shortly."
+        title="Book a Table"
+        subtitle="Reserve your table for an unforgettable dining experience"
       />
 
-      <section className="py-10 sm:py-12 md:py-16" aria-labelledby="book-heading">
-        <div className="section-container max-w-6xl w-full grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div ref={formCardRef} className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-6 md:p-8">
+      <section className="py-10 sm:py-12 md:py-16 bg-gray-50" aria-labelledby="book-heading">
+        <div className="section-container max-w-2xl w-full">
+          <div ref={formCardRef} className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-6 md:p-8">
             <h2 id="book-heading" className="sr-only">Reservation form</h2>
-            <div className="mb-6 pb-5 border-b border-slate-200">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary-600">Table Reservation</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">Reservation Details</h3>
-              <p className="text-slate-600 text-sm mt-1">Complete the form below and we will confirm your spot within minutes.</p>
-            </div>
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6" noValidate>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
@@ -265,42 +262,26 @@ function BookATableContent() {
 
               <button
                 type="submit"
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold text-lg py-3.5 rounded-lg transition-colors duration-200 disabled:opacity-70"
+                className="w-full bg-primary-600 hover:bg-primary-500 text-white font-semibold text-lg py-4 rounded-lg transition-colors duration-200 disabled:opacity-70"
                 disabled={submitted}
               >
-                {submitted ? 'Reservation Submitted' : 'Send Reservation Request'}
+                {submitted ? 'Reservation Submitted' : 'Reserve Table'}
               </button>
             </form>
 
-            <div ref={policyRef} className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-200">
-              <h3 className="font-semibold text-slate-900 mb-3 sm:mb-4 text-base sm:text-lg">Dining Policy</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
+            <div ref={policyRef} className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-base sm:text-lg">Reservation Policy</h3>
+              <ul className="space-y-2 text-sm text-gray-600">
                 <li>• Reservations are held for 15 minutes past the reserved time</li>
                 <li>• For parties of 8 or more, please call us directly</li>
                 <li>• Cancellations should be made at least 24 hours in advance</li>
                 <li>• We recommend booking in advance for weekend dining</li>
               </ul>
-              <p className="mt-4 text-slate-600 text-sm">
+              <p className="mt-4 text-gray-600 text-sm">
                 Questions? <Link href="/contact" className="text-primary-500 hover:text-primary-600">Contact us</Link>.
               </p>
             </div>
           </div>
-
-          <aside className="space-y-4">
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-              <h3 className="font-semibold text-slate-900 mb-3">Instant Booking</h3>
-              <a href="https://wa.me/" className="block w-full rounded-lg bg-green-500 text-white text-sm font-semibold px-4 py-3 text-center mb-3">WhatsApp Us</a>
-              <a href="tel:+9477240000" className="block w-full rounded-lg bg-primary-500 text-white text-sm font-semibold px-4 py-3 text-center">Call Host</a>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-              <h3 className="font-semibold text-slate-900 mb-3">Important Info</h3>
-              <ul className="space-y-3 text-sm text-slate-600">
-                <li>Cancellation policy: 24 hours prior notice preferred.</li>
-                <li>Group booking (10+): please contact us directly.</li>
-                <li>Late arrivals: table hold for 15 minutes.</li>
-              </ul>
-            </div>
-          </aside>
         </div>
       </section>
     </div>
@@ -308,5 +289,7 @@ function BookATableContent() {
 }
 
 export default function BookATable() {
-  return <BookATableContent />
+  return (
+    <LoadingSpinner message="Loading reservation form..." />
+  )
 }

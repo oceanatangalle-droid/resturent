@@ -44,23 +44,23 @@ export default function AdminDashboard() {
 
       {/* Analytics section */}
       <section id="analytics" className="space-y-5">
-        <h2 className="text-lg font-semibold text-slate-900">Analytics</h2>
+        <h2 className="text-lg font-semibold text-white">Analytics</h2>
         {stats !== null && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="admin-surface p-5">
-              <p className="text-sm font-medium text-slate-600">Reservations</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{stats.reservations}</p>
-              <p className="text-xs text-slate-500 mt-1">Total bookings</p>
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+              <p className="text-sm font-medium text-zinc-400">Reservations</p>
+              <p className="text-2xl font-semibold text-white mt-1">{stats.reservations}</p>
+              <p className="text-xs text-zinc-500 mt-1">Total bookings</p>
             </div>
-            <div className="admin-surface p-5">
-              <p className="text-sm font-medium text-slate-600">Contact messages</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{stats.contactMessages}</p>
-              <p className="text-xs text-slate-500 mt-1">From Contact Us form</p>
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+              <p className="text-sm font-medium text-zinc-400">Contact messages</p>
+              <p className="text-2xl font-semibold text-white mt-1">{stats.contactMessages}</p>
+              <p className="text-xs text-zinc-500 mt-1">From Contact Us form</p>
             </div>
-            <div className="admin-surface p-5">
-              <p className="text-sm font-medium text-slate-600">Menu items</p>
-              <p className="text-2xl font-semibold text-slate-900 mt-1">{stats.menuItems}</p>
-              <p className="text-xs text-slate-500 mt-1">Across all categories</p>
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-5">
+              <p className="text-sm font-medium text-zinc-400">Menu items</p>
+              <p className="text-2xl font-semibold text-white mt-1">{stats.menuItems}</p>
+              <p className="text-xs text-zinc-500 mt-1">Across all categories</p>
             </div>
           </div>
         )}
@@ -69,21 +69,21 @@ export default function AdminDashboard() {
             <AnalyticsWorldMap />
           </div>
           <div className="space-y-3">
-            <p className="text-sm font-medium text-slate-500 mb-2">Quick links</p>
+            <p className="text-sm font-medium text-zinc-400 mb-2">Quick links</p>
             {cards.map(({ href, title, desc, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className="group flex items-start gap-4 bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
+                className="group flex items-start gap-4 bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-200"
               >
-                <span className="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-primary-100 group-hover:text-primary-700 flex items-center justify-center shrink-0 transition-colors">
+                <span className="w-9 h-9 rounded-lg bg-zinc-800 text-zinc-400 group-hover:bg-primary-600/20 group-hover:text-primary-400 flex items-center justify-center shrink-0 transition-colors">
                   <Icon />
                 </span>
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold text-slate-900 group-hover:text-primary-700 transition-colors">
+                  <h2 className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors">
                     {title}
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">{desc}</p>
                 </div>
               </Link>
             ))}
