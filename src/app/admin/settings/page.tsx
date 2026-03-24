@@ -63,28 +63,55 @@ export default function AdminSettings() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!data) return
+
     setError('')
     setSaving(true)
     setSaved(false)
+
     const payload = {
-      ...data,
+      siteName: data.siteName.trim(),
+      currencySymbol: data.currencySymbol,
+      currencyCode: data.currencyCode,
+      facebookUrl: data.facebookUrl.trim(),
+      whatsappUrl: data.whatsappUrl.trim(),
+      instagramUrl: data.instagramUrl.trim(),
+      googleBusinessUrl: data.googleBusinessUrl.trim(),
+      tripadvisorUrl: data.tripadvisorUrl.trim(),
+      ratingValue: data.ratingValue.trim() || null,
       reviewCount: data.reviewCount ? parseInt(data.reviewCount, 10) : null,
+      priceRange: data.priceRange.trim() || null,
     }
+
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+
+      const result = await res.json()
+
       if (!res.ok) {
-        setError('Failed to save. Please try again.')
+        setError(result.error || 'Failed to save settings. Please try again.')
         setSaving(false)
         return
       }
+
       setSaved(true)
       setSaving(false)
+      
+      // Refresh the form with latest data
+      setData({
+        ...data,
+        ...result,
+        reviewCount: result.reviewCount != null ? String(result.reviewCount) : '',
+        ratingValue: result.ratingValue ?? '',
+        priceRange: result.priceRange ?? '',
+      })
+
       setTimeout(() => setSaved(false), 3000)
-    } catch {
+    } catch (err) {
+      console.error(err)
       setError('Something went wrong. Please check your connection.')
       setSaving(false)
     }

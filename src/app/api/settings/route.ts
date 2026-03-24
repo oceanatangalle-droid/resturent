@@ -9,9 +9,27 @@ export async function GET() {
 }
 
 async function handleUpdate(request: Request) {
-  const body = await request.json()
-  const data = await updateSettings(body)
-  return NextResponse.json(data)
+  try {
+    const body = await request.json()
+    
+    // Ensure reviewCount is properly converted to number or null
+    if (body.reviewCount !== undefined) {
+      if (body.reviewCount === '' || body.reviewCount === null) {
+        body.reviewCount = null
+      } else {
+        const num = parseInt(body.reviewCount, 10)
+        body.reviewCount = isNaN(num) ? null : num
+      }
+    }
+
+    const data = await updateSettings(body)
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Settings update error:', error)
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Failed to update settings' 
+    }, { status: 500 })
+  }
 }
 
 export async function PUT(request: Request) {
