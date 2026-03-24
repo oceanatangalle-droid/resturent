@@ -1,11 +1,13 @@
 'use client'
 
+import LoadingSpinner from '@/components/LoadingSpinner'
+
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { gsap, ScrollTrigger, ensureGSAP } from '@/lib/animations'
 import PageHeader from '@/components/PageHeader'
 
-export default function BookATable() {
+function BookATableContent() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -281,5 +283,11 @@ export default function BookATable() {
         </div>
       </section>
     </div>
+  )
+}
+
+export default function BookATable() {
+  return (
+    <LoadingSpinner message="Loading reservation form..." />
   )
 }

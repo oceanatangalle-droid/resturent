@@ -37,8 +37,12 @@ export default function Contact() {
   useEffect(() => {
     fetch('/api/contact')
       .then((r) => r.ok ? r.json() : null)
-      .then((data) => data && setContactInfo(data))
-      .catch(() => {})
+      .then((data) => {
+        if (data) setContactInfo(data)
+      })
+      .catch((err) => {
+        console.warn('Failed to load contact info:', err)
+      })
   }, [])
 
   useEffect(() => {
