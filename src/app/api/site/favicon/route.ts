@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server'
 import { getBranding } from '@/lib/store'
 
 export async function GET() {
-  const { faviconBase64 } = await getBranding()
+  let faviconBase64 = ''
+  try {
+    const branding = await getBranding()
+    faviconBase64 = branding.faviconBase64 || ''
+  } catch (error) {
+    console.warn('Failed to get favicon, using default')
+  }
+
   if (!faviconBase64 || !faviconBase64.startsWith('data:')) {
     return new NextResponse(null, { status: 404 })
   }

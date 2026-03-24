@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server'
 import { getBranding } from '@/lib/store'
 
 export async function GET() {
-  const { logoBase64 } = await getBranding()
+  let logoBase64 = ''
+  try {
+    const branding = await getBranding()
+    logoBase64 = branding.logoBase64 || ''
+  } catch (error) {
+    console.warn('Failed to get logo, using default')
+  }
+
   if (!logoBase64 || !logoBase64.startsWith('data:')) {
     return new NextResponse(null, { status: 404 })
   }

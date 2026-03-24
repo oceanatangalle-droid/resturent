@@ -1,10 +1,7 @@
 import { getHome, getItems, getGalleryItems } from '@/lib/store'
 import HomeClient from './HomeClient'
 
-export const revalidate = 3600
-
-// This is a server component. For real loading UI during data fetch, we would use 
-// loading.tsx or Suspense. For now we keep data fetching here.
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   let homeData: any

@@ -5,7 +5,7 @@ import * as schema from './schema'
 const connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {
-  console.warn('DATABASE_URL is not set. Admin and API data will not persist.')
+  console.warn('DATABASE_URL is not set. The app will use fallback mode for build.')
 }
 
 // Supabase and most cloud Postgres require SSL; enable it when using Supabase
