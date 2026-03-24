@@ -127,16 +127,15 @@ export default function AdminSettings() {
     return (
       <div>
         <AdminPageHeader title="Settings" subtitle="Site-wide settings." />
-        <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-12 text-center">
+        <div className="admin-surface p-12 text-center">
           <div className="inline-block w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-zinc-400">Loading...</p>
+          <p className="text-slate-600">Loading...</p>
         </div>
       </div>
     )
   }
 
-  const inputClass =
-    'w-full px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder-zinc-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors'
+  const inputClass = 'admin-input'
 
   return (
     <div>
@@ -145,24 +144,24 @@ export default function AdminSettings() {
         subtitle="Change site name, currency, and other site options. The site name appears in the header, footer, page titles, and emails."
       />
       <div className="max-w-xl">
-        <form onSubmit={handleSubmit} className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="admin-surface p-6 space-y-6">
           {error && (
-            <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div className="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               {error}
             </div>
           )}
           {saved && (
-            <div className="px-4 py-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm">
+            <div className="px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
               Settings saved. The site name, currency, and links will update across the site.
             </div>
           )}
 
           <section>
-            <h2 className="text-base font-semibold text-white mb-4">Site name</h2>
-            <p className="text-sm text-zinc-400 mb-3">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">Site name</h2>
+            <p className="text-sm text-slate-600 mb-3">
               The name of your restaurant. This appears in the header, footer, page titles, and reservation emails.
             </p>
-            <label className="block text-sm font-medium text-zinc-300 mb-1.5">Site name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Site name</label>
             <input
               type="text"
               value={data.siteName}
@@ -173,11 +172,11 @@ export default function AdminSettings() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white mb-4">Currency</h2>
-            <p className="text-sm text-zinc-400 mb-3">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">Currency</h2>
+            <p className="text-sm text-slate-600 mb-3">
               Choose the currency symbol/code used for menu and featured item prices across the site.
             </p>
-            <label className="block text-sm font-medium text-zinc-300 mb-1.5">Currency</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Currency</label>
             <select
               value={CURRENCY_OPTIONS.find((o) => o.code === data.currencyCode)?.code ?? data.currencyCode}
               onChange={(e) => {
@@ -192,19 +191,19 @@ export default function AdminSettings() {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-zinc-500 mt-2">
+            <p className="text-xs text-slate-500 mt-2">
               Preview: {data.currencySymbol}14 (single price), {data.currencySymbol}12–16 (range)
             </p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white mb-4">Social media links</h2>
-            <p className="text-sm text-zinc-400 mb-3">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">Social media links</h2>
+            <p className="text-sm text-slate-600 mb-3">
               URLs for your social profiles. These appear as icons in the footer (center). Leave blank to hide.
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Facebook</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Facebook</label>
                 <input
                   type="url"
                   value={data.facebookUrl}
@@ -214,7 +213,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">WhatsApp Business</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">WhatsApp Business</label>
                 <input
                   type="url"
                   value={data.whatsappUrl}
@@ -224,7 +223,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Instagram</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Instagram</label>
                 <input
                   type="url"
                   value={data.instagramUrl}
@@ -234,7 +233,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Google Business</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Google Business</label>
                 <input
                   type="url"
                   value={data.googleBusinessUrl}
@@ -244,7 +243,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">TripAdvisor</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">TripAdvisor</label>
                 <input
                   type="url"
                   value={data.tripadvisorUrl}
@@ -257,13 +256,13 @@ export default function AdminSettings() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white mb-4">SEO: Ratings & price range</h2>
-            <p className="text-sm text-zinc-400 mb-3">
+            <h2 className="text-base font-semibold text-slate-900 mb-4">SEO: Ratings & price range</h2>
+            <p className="text-sm text-slate-600 mb-3">
               Optional. Used for rich snippets (stars and price in search results). Use values from Google or TripAdvisor. Leave blank to hide.
             </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Rating (e.g. 4.7)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Rating (e.g. 4.7)</label>
                 <input
                   type="text"
                   value={data.ratingValue}
@@ -273,7 +272,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Review count</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Review count</label>
                 <input
                   type="number"
                   min={0}
@@ -284,7 +283,7 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Price range (e.g. $, $$, $$$, $$ - $$$)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Price range (e.g. $, $$, $$$, $$ - $$$)</label>
                 <input
                   type="text"
                   value={data.priceRange}
@@ -300,7 +299,7 @@ export default function AdminSettings() {
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-primary-600 hover:bg-primary-500 text-white transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-primary-500 hover:bg-primary-600 text-white transition-colors disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save settings'}
             </button>

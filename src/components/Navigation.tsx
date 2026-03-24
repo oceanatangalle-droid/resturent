@@ -68,32 +68,29 @@ function Navigation() {
   const showImgLogo = mounted && logoUrl && !logoError
 
   return (
-    <nav ref={navRef} className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm w-full">
+    <nav ref={navRef} className="bg-white/95 backdrop-blur border-b border-slate-200 sticky top-0 z-50 w-full">
       <div className="section-container w-full">
-        <div ref={innerRef} className="flex items-center justify-between h-14 sm:h-16 py-0 min-h-[56px]">
+        <div ref={innerRef} className="flex items-center justify-between h-16 sm:h-[72px] py-0 min-h-[56px]">
           <Link ref={logoRef} href="/" className="flex items-center gap-2 shrink-0 min-h-[44px] min-w-[44px] justify-start md:min-w-0 md:min-h-0">
             {showImgLogo ? (
               <img src={logoUrl!} alt={siteName} className="h-8 sm:h-9 md:h-10 w-auto max-w-[140px] sm:max-w-[160px] md:max-w-[180px] object-contain object-left" />
             ) : (
-              <span className="text-xl sm:text-2xl font-bold text-gray-900">{siteName}</span>
+              <span className="text-xl sm:text-2xl font-bold text-primary-700">{siteName}</span>
             )}
           </Link>
 
           {/* Desktop Navigation */}
           <div ref={linksRef} className="hidden md:flex items-center gap-6 lg:gap-8">
-            <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/" className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium">
               Home
             </Link>
-            <Link href="/menu" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/menu" className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium">
               Menu
             </Link>
-            <Link href="/gallery" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href="/gallery" className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium">
               Gallery
             </Link>
-            <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Contact
-            </Link>
-            <Link href="/book-a-table" className="btn-primary">
+            <Link href="/book-a-table" className="btn-primary text-sm px-5 py-2.5 rounded-full">
               Book a Table
             </Link>
           </div>
@@ -125,34 +122,27 @@ function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden pb-4 pt-2 space-y-0 border-t border-gray-100">
+            <div className="md:hidden pb-4 pt-2 space-y-0 border-t border-slate-100">
             <Link
               href="/"
-              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
+              className="block py-3 px-1 text-slate-600 hover:text-slate-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Home
             </Link>
             <Link
               href="/menu"
-              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
+              className="block py-3 px-1 text-slate-600 hover:text-slate-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Menu
             </Link>
             <Link
               href="/gallery"
-              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
+              className="block py-3 px-1 text-slate-600 hover:text-slate-900 transition-colors min-h-[44px] flex items-center"
               onClick={() => setIsOpen(false)}
             >
               Gallery
-            </Link>
-            <Link
-              href="/contact"
-              className="block py-3 px-1 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] flex items-center"
-              onClick={() => setIsOpen(false)}
-            >
-              Contact
             </Link>
             <Link
               href="/book-a-table"
