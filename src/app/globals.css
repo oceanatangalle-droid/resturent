@@ -13,6 +13,9 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  --theme-primary-500: #ef4444;
+  --theme-primary-600: #dc2626;
+  --theme-primary-700: #b91c1c;
 }
 
 body {
@@ -140,3 +143,33 @@ body {
 .img:hover video {
   transform: scale(1.08);
 }
+
+/* Runtime theme color overrides (from admin settings) */
+.bg-primary-600 { background-color: var(--theme-primary-600) !important; }
+.bg-primary-500 { background-color: var(--theme-primary-500) !important; }
+.text-primary-600 { color: var(--theme-primary-600) !important; }
+.text-primary-500 { color: var(--theme-primary-500) !important; }
+.text-primary-400 { color: var(--theme-primary-600) !important; }
+.border-primary-600 { border-color: var(--theme-primary-600) !important; }
+.border-primary-500 { border-color: var(--theme-primary-500) !important; }
+.ring-primary-500 { --tw-ring-color: var(--theme-primary-500) !important; }
+.hover\:bg-primary-500:hover { background-color: var(--theme-primary-500) !important; }
+.hover\:bg-primary-700:hover { background-color: var(--theme-primary-700) !important; }
+.hover\:text-primary-600:hover { color: var(--theme-primary-600) !important; }
+
+/* Admin light mode */
+.admin-theme [class*="bg-zinc-900"] { background-color: #ffffff !important; }
+.admin-theme [class*="bg-zinc-800"] { background-color: #f8fafc !important; }
+.admin-theme [class*="bg-zinc-700"] { background-color: #f1f5f9 !important; }
+.admin-theme [class*="border-zinc-900"],
+.admin-theme [class*="border-zinc-800"],
+.admin-theme [class*="border-zinc-700"],
+.admin-theme [class*="border-zinc-600"] { border-color: #e5e7eb !important; }
+.admin-theme [class*="text-zinc-500"],
+.admin-theme [class*="text-zinc-400"] { color: #6b7280 !important; }
+.admin-theme [class*="text-zinc-300"],
+.admin-theme [class*="text-zinc-200"],
+.admin-theme [class*="text-white"] { color: #111827 !important; }
+.admin-theme [class*="hover:bg-zinc-800"]:hover,
+.admin-theme [class*="hover:bg-zinc-700"]:hover { background-color: #f3f4f6 !important; }
+.admin-theme [class*="hover:text-white"]:hover { color: #111827 !important; }

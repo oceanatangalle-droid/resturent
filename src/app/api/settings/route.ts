@@ -22,6 +22,11 @@ async function handleUpdate(request: Request) {
       }
     }
 
+    if (body.primaryColor !== undefined) {
+      const color = String(body.primaryColor).trim()
+      body.primaryColor = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/.test(color) ? color : '#dc2626'
+    }
+
     const data = await updateSettings(body)
     return NextResponse.json(data)
   } catch (error) {

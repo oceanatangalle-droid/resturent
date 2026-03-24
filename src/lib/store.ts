@@ -76,6 +76,7 @@ export interface SiteSettingsData {
   instagramUrl: string
   googleBusinessUrl: string
   tripadvisorUrl: string
+  primaryColor: string
   ratingValue?: string | null
   reviewCount?: number | null
   priceRange?: string | null
@@ -205,6 +206,7 @@ let memorySettings: SiteSettingsData = {
   instagramUrl: '',
   googleBusinessUrl: '',
   tripadvisorUrl: '',
+  primaryColor: '#dc2626',
   ratingValue: null,
   reviewCount: null,
   priceRange: null,
@@ -443,6 +445,7 @@ export async function getSettings(): Promise<SiteSettingsData> {
       instagramUrl: r.instagramUrl ?? '',
       googleBusinessUrl: r.googleBusinessUrl ?? '',
       tripadvisorUrl: r.tripadvisorUrl ?? '',
+      primaryColor: r.primaryColor ?? '#dc2626',
       ratingValue: r.ratingValue ?? null,
       reviewCount: r.reviewCount ?? null,
       priceRange: r.priceRange ?? null,
@@ -464,6 +467,7 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
     instagramUrl: data.instagramUrl !== undefined ? data.instagramUrl : current.instagramUrl,
     googleBusinessUrl: data.googleBusinessUrl !== undefined ? data.googleBusinessUrl : current.googleBusinessUrl,
     tripadvisorUrl: data.tripadvisorUrl !== undefined ? data.tripadvisorUrl : current.tripadvisorUrl,
+    primaryColor: data.primaryColor !== undefined ? data.primaryColor : current.primaryColor,
     ratingValue: data.ratingValue !== undefined ? data.ratingValue : current.ratingValue,
     reviewCount: data.reviewCount !== undefined ? data.reviewCount : current.reviewCount,
     priceRange: data.priceRange !== undefined ? data.priceRange : current.priceRange,
@@ -482,6 +486,7 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
           instagramUrl: next.instagramUrl,
           googleBusinessUrl: next.googleBusinessUrl,
           tripadvisorUrl: next.tripadvisorUrl,
+          primaryColor: next.primaryColor,
           ratingValue: next.ratingValue ?? undefined,
           reviewCount: next.reviewCount ?? undefined,
           priceRange: next.priceRange ?? undefined,
@@ -497,6 +502,7 @@ export async function updateSettings(data: Partial<SiteSettingsData>): Promise<S
             instagramUrl: next.instagramUrl,
             googleBusinessUrl: next.googleBusinessUrl,
             tripadvisorUrl: next.tripadvisorUrl,
+            primaryColor: next.primaryColor,
             ratingValue: next.ratingValue ?? undefined,
             reviewCount: next.reviewCount ?? undefined,
             priceRange: next.priceRange ?? undefined,

@@ -78,6 +78,7 @@ export const siteSettings = pgTable('site_settings', {
   instagramUrl: varchar('instagram_url', { length: 512 }).notNull().default(''),
   googleBusinessUrl: varchar('google_business_url', { length: 512 }).notNull().default(''),
   tripadvisorUrl: varchar('tripadvisor_url', { length: 512 }).notNull().default(''),
+  primaryColor: varchar('primary_color', { length: 16 }).notNull().default('#dc2626'),
   // SEO: aggregate rating (e.g. from Google/TripAdvisor) and price range for rich snippets
   ratingValue: varchar('rating_value', { length: 16 }), // e.g. "4.7"
   reviewCount: integer('review_count'), // e.g. 812

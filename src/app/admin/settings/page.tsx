@@ -14,6 +14,7 @@ interface SiteSettings {
   instagramUrl: string
   googleBusinessUrl: string
   tripadvisorUrl: string
+  primaryColor: string
   ratingValue: string
   reviewCount: string
   priceRange: string
@@ -54,6 +55,7 @@ export default function AdminSettings() {
         instagramUrl: d?.instagramUrl ?? '',
         googleBusinessUrl: d?.googleBusinessUrl ?? '',
         tripadvisorUrl: d?.tripadvisorUrl ?? '',
+        primaryColor: d?.primaryColor ?? '#dc2626',
         ratingValue: d?.ratingValue ?? '',
         reviewCount: d?.reviewCount != null ? String(d.reviewCount) : '',
         priceRange: d?.priceRange ?? '',
@@ -79,6 +81,7 @@ export default function AdminSettings() {
       instagramUrl: data.instagramUrl.trim(),
       googleBusinessUrl: data.googleBusinessUrl.trim(),
       tripadvisorUrl: data.tripadvisorUrl.trim(),
+      primaryColor: data.primaryColor,
       ratingValue: data.ratingValue.trim() || null,
       reviewCount: data.reviewCount ? parseInt(data.reviewCount, 10) : null,
       priceRange: data.priceRange.trim() || null,
@@ -109,6 +112,7 @@ export default function AdminSettings() {
         reviewCount: result.reviewCount != null ? String(result.reviewCount) : '',
         ratingValue: result.ratingValue ?? '',
         priceRange: result.priceRange ?? '',
+        primaryColor: result.primaryColor ?? data.primaryColor,
       })
 
       setTimeout(() => setSaved(false), 3000)
@@ -170,6 +174,29 @@ export default function AdminSettings() {
               placeholder="Veloria Restaurant"
               className={inputClass}
             />
+          </section>
+
+          <section>
+            <h2 className="text-base font-semibold text-white mb-4">Theme color</h2>
+            <p className="text-sm text-zinc-400 mb-3">
+              Choose your main brand color. Buttons, highlights, links, and accents will update across the full website.
+            </p>
+            <label className="block text-sm font-medium text-zinc-300 mb-1.5">Primary color</label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={data.primaryColor}
+                onChange={(e) => setData({ ...data, primaryColor: e.target.value })}
+                className="h-11 w-14 rounded-lg border border-zinc-600 bg-zinc-800 p-1 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={data.primaryColor}
+                onChange={(e) => setData({ ...data, primaryColor: e.target.value })}
+                placeholder="#dc2626"
+                className={inputClass}
+              />
+            </div>
           </section>
 
           <section>
